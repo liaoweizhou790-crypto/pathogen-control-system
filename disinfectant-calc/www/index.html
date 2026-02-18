@@ -635,7 +635,7 @@
                                 ⚡ 应用推荐方案
                             </button>
                             <button class="btn btn-secondary" onclick="exportAnalysisResult()" style="flex: 1; min-width: 150px;">
-                                📥 导出结果
+                                📄 导出PDF报告
                             </button>
                         </div>
                     </div>
@@ -3413,26 +3413,184 @@ function applyDisinfectionPlan(plan) {
     switchTab('calc');
 }
 
-// 导出分析结果
+// 导出分析结果为PDF
 function exportAnalysisResult() {
     if (!lastAnalysisResult) {
         showAnalysisStatus('没有可导出的分析结果', 'error');
         return;
     }
     
-    const content = JSON.stringify(lastAnalysisResult, null, 2);
-    const blob = new Blob([content], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    // 创建PDF内容
+    const result = lastAnalysisResult;
+    const dateStr = new Date().toLocaleString('zh-CN');
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `流调分析报告_${new Date().toLocaleDateString()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    let pdfContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>流调分析报告</title>
+        <style>
+            @page { size: A4; margin: 20mm; }
+            body { font-family: "SimSun", "Microsoft YaHei", sans-serif; line-height: 1.6; color: #333; }
+            .header { text-align: center; border-bottom: 2px solid #667eea; padding-bottom: 15px; margin-bottom: 20px; }
+            .header h1 { color: #667eea; margin: 0; font-size: 24px; }
+            .header p { color: #666; margin: 5px 0; font-size: 12px; }
+            .section { margin-bottom: 20px; }
+            .section h2 { color: #667eea; font-size: 16px; border-left: 4px solid #667eea; padding-left: 10px; margin-bottom: 10px; }
+            .pathogen { background: #f8f9fa; padding: 10px; margin-bottom: 10px; border-radius: 5px; border-left: 4px solid #28a745; }
+            .pathogen.high-risk { border-left-color: #dc3545; }
+            .pathogen-name { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
+            .pathogen-info { font-size: 12px; color: #666; }
+            .disinfection-item { background: #f8f9fa; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+            .disinfection-title { font-weight: bold; color: #667eea; margin-bottom: 5px; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 11px; color: #999; }
+            table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+            th { background: #f5f5f5; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🔍 流调报告智能分析报告</h1>
+            <p>生成时间：${dateStr}</p>
+            <p>柳州市疾病预防控制中心 消毒与病媒生物防制所</p>
+        </div>
+    `;
     
-    URL.revokeObjectURL(url);
-    showAnalysisStatus('分析结果已导出', 'success');
+    // 可能的病原
+    pdfContent += `
+        <div class="section">
+            <h2>🦠 可能的致病菌</h2>
+    `;
+    if (result.pathogens && result.pathogens.length > 0) {
+        result.pathogens.forEach(p => {
+            const riskClass = p.dangerLevel === '第一类' || p.dangerLevel === '第二类' ? 'high-risk' : '';
+            pdfContent += `
+                <div class="pathogen ${riskClass}">
+                    <div class="pathogen-name">${p.name} <span style="color: ${p.probability === '高' ? '#dc3545' : '#28a745'};">(${p.probability}概率)</span></div>
+                    <div class="pathogen-info">
+                        <strong>分类：</strong>${p.category} | 
+                        <strong>危害等级：</strong>${p.dangerLevel} | 
+                        <strong>判断依据：</strong>${p.reason}
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        pdfContent += '<p style="color: #999;">未能识别具体病原</p>';
+    }
+    pdfContent += '</div>';
+    
+    // 传播途径
+    if (result.transmission) {
+        pdfContent += `
+            <div class="section">
+                <h2>📡 传播途径</h2>
+                <table>
+                    <tr><th>项目</th><th>内容</th></tr>
+                    <tr><td>传播途径</td><td>${result.transmission.routes ? result.transmission.routes.join('、') : '未知'}</td></tr>
+                    <tr><td>风险等级</td><td style="color: ${result.transmission.riskLevel === '高' ? '#dc3545' : '#28a745'}; font-weight: bold;">${result.transmission.riskLevel}</td></tr>
+                    <tr><td>防控要点</td><td>${result.transmission.keyPoints || '暂无'}</td></tr>
+                </table>
+            </div>
+        `;
+    }
+    
+    // 推荐消毒方案
+    if (result.disinfection) {
+        pdfContent += `
+            <div class="section">
+                <h2>🛡️ 推荐消毒方案</h2>
+        `;
+        const d = result.disinfection;
+        
+        if (d.environment) {
+            pdfContent += `
+                <div class="disinfection-item">
+                    <div class="disinfection-title">🌍 环境消毒</div>
+                    <table>
+                        <tr><th>消毒剂</th><td>${d.environment.type} ${d.environment.concentration}</td></tr>
+                        <tr><th>使用方法</th><td>${d.environment.method}</td></tr>
+                        <tr><th>作用时间</th><td>${d.environment.time}</td></tr>
+                    </table>
+                </div>
+            `;
+        }
+        
+        if (d.surface) {
+            pdfContent += `
+                <div class="disinfection-item">
+                    <div class="disinfection-title">🖐️ 物体表面消毒</div>
+                    <table>
+                        <tr><th>消毒剂</th><td>${d.surface.type} ${d.surface.concentration}</td></tr>
+                        <tr><th>使用方法</th><td>${d.surface.method}</td></tr>
+                        <tr><th>作用时间</th><td>${d.surface.time}</td></tr>
+                    </table>
+                </div>
+            `;
+        }
+        
+        if (d.air) {
+            pdfContent += `
+                <div class="disinfection-item">
+                    <div class="disinfection-title">💨 空气消毒</div>
+                    <table>
+                        <tr><th>消毒方式</th><td>${d.air.type}</td></tr>
+                        <tr><th>操作方法</th><td>${d.air.method}</td></tr>
+                        <tr><th>作用时间</th><td>${d.air.time}</td></tr>
+                    </table>
+                </div>
+            `;
+        }
+        
+        if (d.ppe) {
+            pdfContent += `
+                <div class="disinfection-item">
+                    <div class="disinfection-title">🛡️ 个人防护</div>
+                    <table>
+                        <tr><th>防护级别</th><td>${d.ppe.level}</td></tr>
+                        <tr><th>防护装备</th><td>${d.ppe.equipment ? d.ppe.equipment.join('、') : '暂无'}</td></tr>
+                    </table>
+                </div>
+            `;
+        }
+        
+        pdfContent += '</div>';
+    }
+    
+    // AI分析详情
+    if (result.analysis) {
+        pdfContent += `
+            <div class="section">
+                <h2>📝 AI分析详情</h2>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-size: 12px; white-space: pre-wrap;">${result.analysis}</div>
+            </div>
+        `;
+    }
+    
+    // 页脚
+    pdfContent += `
+        <div class="footer">
+            <p>本报告由柳州市疾病预防控制中心病原微生物防控系统AI辅助生成</p>
+            <p>仅供参考，具体防控措施请结合实际情况和专业判断</p>
+            <p>系统版本：V1.5.0</p>
+        </div>
+    </body>
+    </html>
+    `;
+    
+    // 创建新窗口并打印为PDF
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(pdfContent);
+    printWindow.document.close();
+    
+    // 等待样式加载后打印
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
+    
+    showAnalysisStatus('PDF报告已生成，请在打印对话框中选择"保存为PDF"', 'success');
 }
 
 // 拖拽上传支持
