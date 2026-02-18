@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">消毒剂配比系统</string>
+    <string name="title_activity_main">消毒剂配比系统</string>
+    <string name="package_name">cn.liuzhou.cdc.disinfectant</string>
+    <string name="custom_url_scheme">cn.liuzhou.cdc.disinfectant</string>
+</resources>
