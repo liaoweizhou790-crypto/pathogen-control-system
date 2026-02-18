@@ -1,0 +1,36 @@
+# OpenClaw Workspace
+# 忽略系统文件
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 忽略编辑器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 忽略日志文件
+*.log
+
+# 忽略临时文件
+/tmp/
+*.tmp
+
+# 忽略依赖目录（如果放在工作区）
+node_modules/
+__pycache__/
+*.pyc
+
+# 忽略OpenClaw内部文件
+.openclaw/
+.clawhub/
+
+# 忽略凭证文件
+.credentials/
+*.key
+*.pem
+
+# 忽略生成的APK文件
+*.apk
