@@ -31,27 +31,21 @@ jobs:
       working-directory: ./disinfectant-calc
       run: npx cap sync android
     
-    - name: Build APK
+    - name: Build Debug APK
       working-directory: ./disinfectant-calc/android
-      run: ./gradlew assembleRelease
-    
-    - name: Sign APK (Debug)
-      working-directory: ./disinfectant-calc/android
-      run: |
-        # 使用debug签名
-        ls -la app/build/outputs/apk/release/
+      run: ./gradlew assembleDebug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: CDC-Disinfectant-V1.5.0
-        path: disinfectant-calc/android/app/build/outputs/apk/release/*.apk
+        path: disinfectant-calc/android/app/build/outputs/apk/debug/*.apk
         retention-days: 30
     
     - name: Create Release
       if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: disinfectant-calc/android/app/build/outputs/apk/release/*.apk
+        files: disinfectant-calc/android/app/build/outputs/apk/debug/*.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
