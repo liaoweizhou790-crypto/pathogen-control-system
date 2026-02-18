@@ -10,6 +10,11 @@
     <meta name="description" content="柳州市疾病预防控制中心病原微生物防控系统">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192x192.png">
+    <!-- PDF.js for PDF text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <title>柳州市疾病预防控制中心病原微生物防控系统（v1.4.3）</title>
     <style>
         * {
@@ -271,6 +276,7 @@
             <button class="tab" onclick="switchTab('recommend')">推荐浓度</button>
             <button class="tab" onclick="switchTab('records')">配比记录</button>
             <button class="tab" onclick="switchTab('presets')">常用方案</button>
+            <button class="tab" onclick="switchTab('epidemicAnalysis')">🔍 流调分析</button>
             <button class="tab" onclick="switchTab('aiConfig')">🤖 AI配置</button>
         </div>
         
@@ -510,6 +516,133 @@
             <!-- 常用方案 -->
             <div id="presets" class="tab-content">
                 <div id="presetsList"></div>
+            </div>
+            
+            <!-- 流调分析 -->
+            <div id="epidemicAnalysis" class="tab-content">
+                <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🔍 流调报告智能分析</h3>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
+                        上传流调报告，AI自动识别可能的致病菌并推荐消毒方案。支持文本、图片、PDF格式。
+                    </p>
+                </div>
+                
+                <!-- 输入方式选择 -->
+                <div class="form-group">
+                    <label>选择输入方式</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="setAnalysisMode('text')" id="modeText" style="flex: 1; min-width: 100px;">📝 文本输入</button>
+                        <button class="btn btn-secondary" onclick="setAnalysisMode('image')" id="modeImage" style="flex: 1; min-width: 100px;">🖼️ 图片上传</button>
+                        <button class="btn btn-secondary" onclick="setAnalysisMode('pdf')" id="modePdf" style="flex: 1; min-width: 100px;">📄 PDF上传</button>
+                    </div>
+                </div>
+                
+                <!-- 文本输入区域 -->
+                <div id="textInputArea" class="analysis-input-area">
+                    <div class="form-group">
+                        <label>粘贴流调报告内容</label>
+                        <textarea id="epidemicText" rows="10" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; resize: vertical;" placeholder="请粘贴流调报告文本内容...
+
+例如：
+患者，男，35岁，发热3天，体温最高39.5℃，伴有咳嗽、乏力。发病前一周有活禽市场接触史。实验室检查：白细胞降低，淋巴细胞减少..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- 图片上传区域 -->
+                <div id="imageInputArea" class="analysis-input-area" style="display: none;">
+                    <div class="form-group">
+                        <label>上传流调报告图片</label>
+                        <div id="imageDropZone" style="border: 2px dashed #667eea; border-radius: 10px; padding: 40px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s;" onclick="document.getElementById('epidemicImage').click()">
+                            <div style="font-size: 48px; margin-bottom: 15px;">📷</div>
+                            <div style="color: #667eea; font-weight: bold; margin-bottom: 10px;">点击或拖拽上传图片</div>
+                            <div style="color: #999; font-size: 13px;">支持 JPG、PNG、GIF 格式</div>
+                        </div>
+                        <input type="file" id="epidemicImage" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                        <div id="imagePreview" style="margin-top: 15px; display: none;">
+                            <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #ddd;">
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-secondary" onclick="clearImage()">🗑️ 清除图片</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PDF上传区域 -->
+                <div id="pdfInputArea" class="analysis-input-area" style="display: none;">
+                    <div class="form-group">
+                        <label>上传流调报告PDF</label>
+                        <div id="pdfDropZone" style="border: 2px dashed #667eea; border-radius: 10px; padding: 40px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s;" onclick="document.getElementById('epidemicPdf').click()">
+                            <div style="font-size: 48px; margin-bottom: 15px;">📑</div>
+                            <div style="color: #667eea; font-weight: bold; margin-bottom: 10px;">点击或拖拽上传PDF</div>
+                            <div style="color: #999; font-size: 13px;">支持 PDF 格式，最大 10MB</div>
+                        </div>
+                        <input type="file" id="epidemicPdf" accept=".pdf,application/pdf" style="display: none;" onchange="handlePdfUpload(event)">
+                        <div id="pdfPreview" style="margin-top: 15px; display: none;">
+                            <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #0066cc;">
+                                <div style="font-weight: bold; color: #004085; margin-bottom: 5px;">📄 已选择PDF文件</div>
+                                <div id="pdfFileName" style="color: #666; font-size: 14px;"></div>
+                                <div id="pdfExtractedText" style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px; max-height: 150px; overflow-y: auto; font-size: 13px; color: #333;"></div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-secondary" onclick="clearPdf()">🗑️ 清除PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分析按钮 -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="analyzeEpidemicReport()" style="padding: 15px 40px; font-size: 16px;">
+                        🤖 AI智能分析
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAnalysisInput()" style="margin-left: 10px;">
+                        🗑️ 清空
+                    </button>
+                </div>
+                
+                <!-- 分析结果 -->
+                <div id="analysisResult" style="margin-top: 25px; display: none;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #667eea; margin-bottom: 15px;">📊 分析结果</h4>
+                        
+                        <!-- 可能的病原 -->
+                        <div id="detectedPathogens" style="margin-bottom: 20px;">
+                            <h5 style="color: #333; margin-bottom: 10px;">🦠 可能的致病菌</h5>
+                            <div id="pathogensList"></div>
+                        </div>
+                        
+                        <!-- 传播途径 -->
+                        <div id="transmissionRoute" style="margin-bottom: 20px;">
+                            <h5 style="color: #333; margin-bottom: 10px;">📡 传播途径</h5>
+                            <div id="routeContent"></div>
+                        </div>
+                        
+                        <!-- 推荐方案 -->
+                        <div id="recommendedPlan" style="margin-bottom: 20px;">
+                            <h5 style="color: #333; margin-bottom: 10px;">🛡️ 推荐消毒方案</h5>
+                            <div id="planContent"></div>
+                        </div>
+                        
+                        <!-- AI分析原始文本 -->
+                        <div id="aiRawAnalysis" style="margin-bottom: 20px;">
+                            <h5 style="color: #333; margin-bottom: 10px;">📝 AI分析详情</h5>
+                            <div id="rawContent" style="background: white; padding: 15px; border-radius: 8px; font-size: 13px; line-height: 1.6; max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+                        
+                        <!-- 操作按钮 -->
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="applyRecommendedPlan()" id="applyPlanBtn" style="flex: 1; min-width: 150px;">
+                                ⚡ 应用推荐方案
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportAnalysisResult()" style="flex: 1; min-width: 150px;">
+                                📥 导出结果
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分析状态 -->
+                <div id="analysisStatus" style="margin-top: 20px;"></div>
             </div>
             
             <!-- AI配置 -->
@@ -1086,6 +1219,16 @@
             // 加载记录和方案
             loadRecords();
             loadPresets();
+            
+            // 初始化流调分析模块
+            if (document.getElementById('epidemicAnalysis')) {
+                initEpidemicAnalysis();
+            }
+            
+            // 初始化AI配置
+            if (document.getElementById('aiConfig')) {
+                initAIConfig();
+            }
         }
 
         // ========== 传染病方案功能 ==========
@@ -2723,6 +2866,643 @@ function showBloodPathogens() {
 
 // ==================== 病原微生物模块结束 ====================
 
+// ==================== 流调分析模块 ====================
+
+// 当前分析模式
+let currentAnalysisMode = 'text';
+let uploadedImageData = null;
+let uploadedPdfText = null;
+let lastAnalysisResult = null;
+
+// 切换分析模式
+function setAnalysisMode(mode) {
+    currentAnalysisMode = mode;
+    
+    // 更新按钮样式
+    document.getElementById('modeText').className = mode === 'text' ? 'btn btn-primary' : 'btn btn-secondary';
+    document.getElementById('modeImage').className = mode === 'image' ? 'btn btn-primary' : 'btn btn-secondary';
+    document.getElementById('modePdf').className = mode === 'pdf' ? 'btn btn-primary' : 'btn btn-secondary';
+    
+    // 显示/隐藏对应输入区域
+    document.getElementById('textInputArea').style.display = mode === 'text' ? 'block' : 'none';
+    document.getElementById('imageInputArea').style.display = mode === 'image' ? 'block' : 'none';
+    document.getElementById('pdfInputArea').style.display = mode === 'pdf' ? 'block' : 'none';
+}
+
+// 处理图片上传
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+        showAnalysisStatus('请选择图片文件', 'error');
+        return;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) {
+        showAnalysisStatus('图片大小不能超过10MB', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        uploadedImageData = e.target.result;
+        document.getElementById('previewImg').src = uploadedImageData;
+        document.getElementById('imagePreview').style.display = 'block';
+        showAnalysisStatus('图片已加载，点击AI智能分析开始识别', 'success');
+    };
+    reader.readAsDataURL(file);
+}
+
+// 清除图片
+function clearImage() {
+    uploadedImageData = null;
+    document.getElementById('epidemicImage').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('previewImg').src = '';
+}
+
+// 处理PDF上传
+async function handlePdfUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.type !== 'application/pdf') {
+        showAnalysisStatus('请选择PDF文件', 'error');
+        return;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) {
+        showAnalysisStatus('PDF大小不能超过10MB', 'error');
+        return;
+    }
+    
+    document.getElementById('pdfFileName').textContent = file.name;
+    document.getElementById('pdfPreview').style.display = 'block';
+    document.getElementById('pdfExtractedText').textContent = '正在提取文本内容...';
+    
+    try {
+        // 使用PDF.js提取文本
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(' ');
+            fullText += pageText + '\n';
+        }
+        
+        uploadedPdfText = fullText;
+        document.getElementById('pdfExtractedText').textContent = fullText.substring(0, 500) + (fullText.length > 500 ? '...' : '');
+        showAnalysisStatus('PDF文本已提取，点击AI智能分析开始识别', 'success');
+    } catch (error) {
+        console.error('PDF解析错误:', error);
+        document.getElementById('pdfExtractedText').textContent = 'PDF文本提取失败，将尝试直接分析PDF内容';
+        showAnalysisStatus('PDF文本提取失败，AI将尝试直接分析', 'warning');
+    }
+}
+
+// 清除PDF
+function clearPdf() {
+    uploadedPdfText = null;
+    document.getElementById('epidemicPdf').value = '';
+    document.getElementById('pdfPreview').style.display = 'none';
+}
+
+// 清空分析输入
+function clearAnalysisInput() {
+    document.getElementById('epidemicText').value = '';
+    clearImage();
+    clearPdf();
+    document.getElementById('analysisResult').style.display = 'none';
+    lastAnalysisResult = null;
+}
+
+// 显示分析状态
+function showAnalysisStatus(message, type) {
+    const statusDiv = document.getElementById('analysisStatus');
+    const colors = {
+        success: '#d4edda',
+        error: '#f8d7da',
+        warning: '#fff3cd',
+        info: '#e7f3ff'
+    };
+    const borderColors = {
+        success: '#28a745',
+        error: '#dc3545',
+        warning: '#ffc107',
+        info: '#0066cc'
+    };
+    const textColors = {
+        success: '#155724',
+        error: '#721c24',
+        warning: '#856404',
+        info: '#004085'
+    };
+    
+    statusDiv.innerHTML = `
+        <div style="background: ${colors[type]}; border-left: 4px solid ${borderColors[type]}; padding: 12px; border-radius: 5px; color: ${textColors[type]};">
+            ${message}
+        </div>
+    `;
+    
+    if (type === 'success' || type === 'warning') {
+        setTimeout(() => { statusDiv.innerHTML = ''; }, 5000);
+    }
+}
+
+// AI分析流调报告
+async function analyzeEpidemicReport() {
+    const config = loadAIConfig();
+    
+    if (!config.apiKey) {
+        showAnalysisStatus('请先配置AI API（点击"AI配置"标签页）', 'error');
+        return;
+    }
+    
+    // 获取输入内容
+    let content = '';
+    let contentType = '';
+    
+    if (currentAnalysisMode === 'text') {
+        content = document.getElementById('epidemicText').value.trim();
+        if (!content) {
+            showAnalysisStatus('请输入流调报告内容', 'error');
+            return;
+        }
+        contentType = '文本';
+    } else if (currentAnalysisMode === 'image') {
+        if (!uploadedImageData) {
+            showAnalysisStatus('请先上传图片', 'error');
+            return;
+        }
+        content = uploadedImageData;
+        contentType = '图片';
+    } else if (currentAnalysisMode === 'pdf') {
+        if (!uploadedPdfText) {
+            showAnalysisStatus('PDF文本提取失败，请尝试使用文本模式手动粘贴内容', 'error');
+            return;
+        }
+        content = uploadedPdfText;
+        contentType = 'PDF';
+    }
+    
+    // 显示分析中状态
+    document.getElementById('analysisResult').style.display = 'none';
+    showAnalysisStatus('🔍 AI正在分析流调报告，请稍候...', 'info');
+    
+    try {
+        // 处理baseUrl末尾斜杠
+        let baseUrl = config.baseUrl.trim();
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
+        
+        // 构建系统提示词
+        const systemPrompt = `你是一位专业的流行病学和消毒学专家。请分析提供的流调报告，识别可能的致病菌，并推荐相应的消毒方案。
+
+请按以下JSON格式返回分析结果：
+{
+    "pathogens": [
+        {
+            "name": "病原名称",
+            "probability": "高/中/低",
+            "reason": "判断依据",
+            "category": "细菌/病毒/真菌/其他",
+            "dangerLevel": "第一/二/三/四类"
+        }
+    ],
+    "transmission": {
+        "routes": ["传播途径1", "传播途径2"],
+        "riskLevel": "高/中/低",
+        "keyPoints": "防控要点"
+    },
+    "disinfection": {
+        "environment": {
+            "type": "消毒剂类型",
+            "concentration": "推荐浓度",
+            "method": "使用方法",
+            "time": "作用时间"
+        },
+        "surface": {
+            "type": "消毒剂类型",
+            "concentration": "推荐浓度",
+            "method": "使用方法",
+            "time": "作用时间"
+        },
+        "air": {
+            "type": "消毒方式",
+            "method": "操作方法",
+            "time": "作用时间"
+        },
+        "ppe": {
+            "level": "防护级别",
+            "equipment": ["防护装备1", "防护装备2"]
+        }
+    },
+    "analysis": "详细的分析说明"
+}
+
+注意：
+1. 基于报告中的症状、接触史、实验室检查等信息进行分析
+2. 优先考虑常见的传染病原体
+3. 消毒方案应符合GB19193-2025标准
+4. 如果是高致病性病原（第一类、第二类），必须明确标注并给出严格的消毒和防护建议`;
+
+        // 构建用户消息
+        let userMessage = '';
+        let messages = [];
+        
+        if (currentAnalysisMode === 'image') {
+            // 图片模式使用vision API
+            messages = [
+                { role: 'system', content: systemPrompt },
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: '请分析这张流调报告图片，识别可能的致病菌并推荐消毒方案。' },
+                        { type: 'image_url', image_url: { url: content } }
+                    ]
+                }
+            ];
+        } else {
+            // 文本/PDF模式
+            userMessage = `请分析以下流调报告：\n\n${content}`;
+            messages = [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userMessage }
+            ];
+        }
+        
+        // 构建请求体
+        const requestBody = {
+            model: config.model,
+            messages: messages,
+            max_tokens: config.maxTokens,
+            temperature: config.temperature
+        };
+        
+        // 使用AbortController实现超时
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60秒超时
+        
+        // 发送请求
+        const response = await fetch(`${baseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.apiKey}`
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            let errorMessage = `HTTP ${response.status}`;
+            try {
+                const errorText = await response.text();
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.error?.message || errorJson.message || errorText;
+                } catch {
+                    errorMessage = errorText || `HTTP ${response.status}`;
+                }
+            } catch {
+                errorMessage = `HTTP ${response.status}`;
+            }
+            throw new Error(errorMessage);
+        }
+        
+        const data = await response.json();
+        const aiResponse = data.choices[0].message.content;
+        
+        // 解析AI返回的JSON
+        let analysisResult;
+        try {
+            // 尝试从AI响应中提取JSON
+            const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                analysisResult = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('无法解析AI返回的结果');
+            }
+        } catch (parseError) {
+            console.error('JSON解析错误:', parseError);
+            // 如果解析失败，使用原始文本作为分析结果
+            analysisResult = {
+                pathogens: [],
+                transmission: { routes: [], riskLevel: '未知', keyPoints: '' },
+                disinfection: {},
+                analysis: aiResponse
+            };
+        }
+        
+        // 保存分析结果
+        lastAnalysisResult = analysisResult;
+        
+        // 显示分析结果
+        displayAnalysisResult(analysisResult);
+        
+        showAnalysisStatus(`${contentType}分析完成！`, 'success');
+        
+    } catch (error) {
+        console.error('AI分析错误:', error);
+        let errorMsg = error.message;
+        
+        if (error.name === 'AbortError') {
+            errorMsg = '分析超时（60秒），请重试或缩短输入内容';
+        } else if (error.message.includes('Failed to fetch')) {
+            errorMsg = '网络请求失败，请检查网络连接和API配置';
+        }
+        
+        showAnalysisStatus(`分析失败: ${errorMsg}`, 'error');
+    }
+}
+
+// 显示分析结果
+function displayAnalysisResult(result) {
+    const resultDiv = document.getElementById('analysisResult');
+    resultDiv.style.display = 'block';
+    
+    // 显示可能的病原
+    const pathogensDiv = document.getElementById('pathogensList');
+    if (result.pathogens && result.pathogens.length > 0) {
+        pathogensDiv.innerHTML = result.pathogens.map(p => `
+            <div style="background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid ${p.dangerLevel === '第一类' || p.dangerLevel === '第二类' ? '#dc3545' : '#28a745'};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <strong style="font-size: 16px;">${p.name}</strong>
+                    <span style="background: ${p.probability === '高' ? '#dc3545' : p.probability === '中' ? '#ffc107' : '#6c757d'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${p.probability}概率</span>
+                </div>
+                <div style="color: #666; font-size: 13px; margin-bottom: 5px;">${p.reason}</div>
+                <div style="display: flex; gap: 10px; font-size: 12px; color: #999;">
+                    <span>📂 ${p.category}</span>
+                    <span>⚠️ ${p.dangerLevel}</span>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        pathogensDiv.innerHTML = '<div style="color: #999; padding: 10px;">未能识别具体病原，请参考AI分析详情</div>';
+    }
+    
+    // 显示传播途径
+    const routeDiv = document.getElementById('routeContent');
+    if (result.transmission) {
+        routeDiv.innerHTML = `
+            <div style="background: white; padding: 15px; border-radius: 8px;">
+                <div style="margin-bottom: 10px;">
+                    <strong>传播途径：</strong>${result.transmission.routes ? result.transmission.routes.join('、') : '未知'}
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>风险等级：</strong>
+                    <span style="color: ${result.transmission.riskLevel === '高' ? '#dc3545' : result.transmission.riskLevel === '中' ? '#ffc107' : '#28a745'}; font-weight: bold;">
+                        ${result.transmission.riskLevel}
+                    </span>
+                </div>
+                <div>
+                    <strong>防控要点：</strong>${result.transmission.keyPoints || '暂无'}
+                </div>
+            </div>
+        `;
+    } else {
+        routeDiv.innerHTML = '<div style="color: #999; padding: 10px;">暂无传播途径信息</div>';
+    }
+    
+    // 显示推荐方案
+    const planDiv = document.getElementById('planContent');
+    if (result.disinfection) {
+        const d = result.disinfection;
+        let planHtml = '<div style="background: white; padding: 15px; border-radius: 8px;">';
+        
+        if (d.environment) {
+            planHtml += `
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #667eea;">🌍 环境消毒</strong>
+                    <div style="margin-top: 5px; padding-left: 15px;">
+                        <div>消毒剂：${d.environment.type} ${d.environment.concentration}</div>
+                        <div>方法：${d.environment.method}</div>
+                        <div>时间：${d.environment.time}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (d.surface) {
+            planHtml += `
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #667eea;">🖐️ 物体表面</strong>
+                    <div style="margin-top: 5px; padding-left: 15px;">
+                        <div>消毒剂：${d.surface.type} ${d.surface.concentration}</div>
+                        <div>方法：${d.surface.method}</div>
+                        <div>时间：${d.surface.time}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (d.air) {
+            planHtml += `
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #667eea;">💨 空气消毒</strong>
+                    <div style="margin-top: 5px; padding-left: 15px;">
+                        <div>方式：${d.air.type}</div>
+                        <div>方法：${d.air.method}</div>
+                        <div>时间：${d.air.time}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (d.ppe) {
+            planHtml += `
+                <div>
+                    <strong style="color: #667eea;">🛡️ 个人防护</strong>
+                    <div style="margin-top: 5px; padding-left: 15px;">
+                        <div>防护级别：${d.ppe.level}</div>
+                        <div>防护装备：${d.ppe.equipment ? d.ppe.equipment.join('、') : '暂无'}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        planHtml += '</div>';
+        planDiv.innerHTML = planHtml;
+    } else {
+        planDiv.innerHTML = '<div style="color: #999; padding: 10px;">暂无推荐消毒方案</div>';
+    }
+    
+    // 显示AI分析原始文本
+    document.getElementById('rawContent').textContent = result.analysis || JSON.stringify(result, null, 2);
+    
+    // 滚动到结果区域
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 应用推荐方案到计算器
+function applyRecommendedPlan() {
+    if (!lastAnalysisResult || !lastAnalysisResult.disinfection) {
+        showAnalysisStatus('没有可应用的推荐方案', 'error');
+        return;
+    }
+    
+    const d = lastAnalysisResult.disinfection;
+    let applied = false;
+    
+    // 优先应用环境消毒方案
+    if (d.environment) {
+        applyDisinfectionPlan(d.environment);
+        applied = true;
+    } else if (d.surface) {
+        applyDisinfectionPlan(d.surface);
+        applied = true;
+    }
+    
+    if (applied) {
+        showAnalysisStatus('推荐方案已应用到配比计算器！', 'success');
+    } else {
+        showAnalysisStatus('推荐方案缺少具体参数，无法自动应用', 'warning');
+    }
+}
+
+// 辅助函数：应用消毒方案到计算器
+function applyDisinfectionPlan(plan) {
+    // 解析浓度和单位
+    let conc = plan.concentration || '';
+    let unit = 'mg/L';
+    
+    if (conc.includes('%')) {
+        unit = '%';
+        conc = conc.replace('%', '').trim();
+    } else if (conc.includes('mg/L')) {
+        unit = 'mg/L';
+        conc = conc.replace('mg/L', '').trim();
+    }
+    
+    // 设置目标浓度
+    document.getElementById('targetConc').value = conc || '500';
+    document.getElementById('targetUnit').value = unit;
+    
+    // 尝试匹配消毒剂类型
+    const type = plan.type || '';
+    const categoryMap = {
+        '含氯': '含氯消毒剂',
+        '84': '含氯消毒剂',
+        '次氯酸': '含氯消毒剂',
+        '过氧乙酸': '过氧化物类',
+        '过氧化氢': '过氧化物类',
+        '二氧化氯': '二氧化氯',
+        '乙醇': '醇类',
+        '酒精': '醇类',
+        '碘': '碘类',
+        '季铵': '季铵盐类',
+        '戊二醛': '醛类'
+    };
+    
+    let category = '含氯消毒剂';
+    for (const key in categoryMap) {
+        if (type.includes(key)) {
+            category = categoryMap[key];
+            break;
+        }
+    }
+    
+    document.getElementById('category').value = category;
+    updateDisinfectants();
+    
+    // 切换到计算标签
+    switchTab('calc');
+}
+
+// 导出分析结果
+function exportAnalysisResult() {
+    if (!lastAnalysisResult) {
+        showAnalysisStatus('没有可导出的分析结果', 'error');
+        return;
+    }
+    
+    const content = JSON.stringify(lastAnalysisResult, null, 2);
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `流调分析报告_${new Date().toLocaleDateString()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    URL.revokeObjectURL(url);
+    showAnalysisStatus('分析结果已导出', 'success');
+}
+
+// 拖拽上传支持
+function initDragAndDrop() {
+    const imageZone = document.getElementById('imageDropZone');
+    const pdfZone = document.getElementById('pdfDropZone');
+    
+    if (imageZone) {
+        imageZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageZone.style.background = '#e7f3ff';
+        });
+        
+        imageZone.addEventListener('dragleave', () => {
+            imageZone.style.background = '#f8f9fa';
+        });
+        
+        imageZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageZone.style.background = '#f8f9fa';
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const input = document.getElementById('epidemicImage');
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                input.files = dt.files;
+                handleImageUpload({ target: input });
+            }
+        });
+    }
+    
+    if (pdfZone) {
+        pdfZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            pdfZone.style.background = '#e7f3ff';
+        });
+        
+        pdfZone.addEventListener('dragleave', () => {
+            pdfZone.style.background = '#f8f9fa';
+        });
+        
+        pdfZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pdfZone.style.background = '#f8f9fa';
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                const input = document.getElementById('epidemicPdf');
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                input.files = dt.files;
+                handlePdfUpload({ target: input });
+            }
+        });
+    }
+}
+
+// 初始化流调分析模块
+function initEpidemicAnalysis() {
+    // 默认选择文本模式
+    setAnalysisMode('text');
+    
+    // 初始化拖拽上传
+    initDragAndDrop();
+}
+
+// ==================== 流调分析模块结束 ====================
+
 // ==================== AI配置模块 ====================
 
 // 默认AI配置
@@ -2964,16 +3744,6 @@ function initAIConfig() {
     const config = loadAIConfig();
     displayAIConfig(config);
 }
-
-// 在初始化函数中调用
-const originalInit = init;
-init = function() {
-    originalInit();
-    // 页面加载完成后初始化AI配置
-    if (document.getElementById('aiConfig')) {
-        initAIConfig();
-    }
-};
 
 // ==================== AI配置模块结束 ====================
     </script>
