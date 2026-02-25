@@ -1,0 +1,29 @@
+{
+  "name": "pathogen-control-system",
+  "version": "1.5.0",
+  "description": "柳州市疾病预防控制中心病原微生物防控系统 v1.5.0 - 符合GB19193-2025标准",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Build complete'",
+    "sync": "npx cap sync",
+    "open:android": "npx cap open android",
+    "build:android": "cd android && ./gradlew assembleRelease"
+  },
+  "keywords": [
+    "pathogen",
+    "disinfectant",
+    "cdc",
+    "control"
+  ],
+  "author": "廖维洲 - 柳州市疾病预防控制中心消毒与病媒生物防制所",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@capacitor-community/file-opener": "^8.0.0",
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/toast": "^8.0.1"
+  }
+}
