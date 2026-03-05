@@ -35,17 +35,37 @@ jobs:
       working-directory: ./pathogen-control-system/android
       run: ./gradlew assembleDebug
     
-    - name: Upload APK
+    - name: Get version from package.json
+      id: version
+      working-directory: ./pathogen-control-system
+      run: |
+        VERSION=$(cat package.json | grep '"version"' | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+    
+    - name: Create version directory
+      run: |
+        mkdir -p pathogen-control-system/apk-versions/${{ steps.version.outputs.version }}
+        cp pathogen-control-system/android/app/build/outputs/apk/debug/app-debug.apk pathogen-control-system/apk-versions/${{ steps.version.outputs.version }}/病原微生物防控系统_v${{ steps.version.outputs.version }}.apk
+    
+    - name: Upload APK to Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: CDC-Pathogen-Control-V1.5.1
-        path: pathogen-control-system/android/app/build/outputs/apk/debug/*.apk
-        retention-days: 30
+        name: CDC-Pathogen-Control-V${{ steps.version.outputs.version }}
+        path: pathogen-control-system/apk-versions/${{ steps.version.outputs.version }}/*.apk
+        retention-days: 90
+    
+    - name: Commit APK to repository
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add pathogen-control-system/apk-versions/
+        git diff --staged --quiet || (git commit -m "chore: 添加APK版本 ${{ steps.version.outputs.version }}" && git push)
     
     - name: Create Release
       if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: pathogen-control-system/android/app/build/outputs/apk/debug/*.apk
+        files: pathogen-control-system/apk-versions/${{ steps.version.outputs.version }}/*.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
