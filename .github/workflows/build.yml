@@ -24,28 +24,28 @@ jobs:
         node-version: '22'
     
     - name: Install dependencies
-      working-directory: ./disinfectant-calc
+      working-directory: ./pathogen-control-system
       run: npm install
     
     - name: Sync Capacitor
-      working-directory: ./disinfectant-calc
+      working-directory: ./pathogen-control-system
       run: npx cap sync android
     
     - name: Build Debug APK
-      working-directory: ./disinfectant-calc/android
+      working-directory: ./pathogen-control-system/android
       run: ./gradlew assembleDebug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: CDC-Disinfectant-V1.5.0
-        path: disinfectant-calc/android/app/build/outputs/apk/debug/*.apk
+        name: CDC-Pathogen-Control-V1.5.1
+        path: pathogen-control-system/android/app/build/outputs/apk/debug/*.apk
         retention-days: 30
     
     - name: Create Release
       if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: disinfectant-calc/android/app/build/outputs/apk/debug/*.apk
+        files: pathogen-control-system/android/app/build/outputs/apk/debug/*.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
