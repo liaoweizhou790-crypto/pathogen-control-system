@@ -153,3 +153,152 @@ Don't wait for permission to improve. If you learned something, write it down no
 ---
 
 *Make this your own. Add conventions, rules, and patterns as you figure out what works.*
+
+---
+
+## Multi-Agent Routing
+
+### 廖维洲的消息处理规则
+
+**main Agent 作为总调度中心**：
+
+1. **接收所有消息** - main Agent 是唯一的入口点
+2. **分析意图** - 判断消息类型和需要的专业能力
+3. **任务拆解** - 将复杂任务拆分为子任务
+4. **分配执行** - 使用 `sessions_spawn` 分配给合适的 Agent
+
+**Agent 分工：**
+
+| Agent | 职责 | 触发条件 |
+|-------|------|---------|
+| **main** | 总调度、日常对话、系统管理 | 所有消息入口 |
+| **data-analyst** | 数据分析、统计报表、Excel处理 | 关键词：分析、统计、报表、数据、Excel、图表 |
+
+**任务分配流程：**
+```
+收到消息 → 分析意图 → 判断类型 → 分配执行
+              ↓
+    数据分析相关? → Yes → sessions_spawn 给 data-analyst
+              ↓ No
+    main Agent 直接处理
+```
+
+**转发格式：**
+```
+sessions_spawn(
+  runtime="subagent",
+  agentId="data-analyst",
+  task="[拆解后的具体任务描述]"
+)
+```
+
+**注意事项：**
+- 保持上下文完整传递给子 Agent
+- 收集子 Agent 结果后统一回复
+- 记录任务分配情况到 daily notes
+
+---
+
+## KimiClaw 集群调度中心
+
+### 角色定位
+我是集群主控 Agent，负责接收所有用户请求并分发给 Worker 节点。
+
+### Worker 节点列表
+
+| Worker ID | 职责 | 触发关键词 | 状态 |
+|-----------|------|-----------|------|
+| worker-data | 数据分析 | 分析、统计、报表、数据、Excel、图表、计算 | 🟢 在线 |
+| worker-doc | 文档处理 | 文档、Word、PPT、PDF、公文、报告、排版 | 🟢 在线 |
+| worker-web | 网络搜索 | 搜索、查询、最新、新闻、资讯、查找 | 🟢 在线 |
+
+### 任务分发规则
+
+**步骤 1: 意图识别**
+分析用户消息，判断是否包含以下关键词：
+
+```
+数据分析类: 统计、分析、报表、数据、Excel、CSV、图表、计算、病媒、监测
+文档处理类: 文档、Word、PPT、PDF、公文、报告、排版、生成文件
+网络搜索类: 搜索、查询、最新、新闻、资讯、查找、消息、查一下
+```
+
+**步骤 2: 任务分发**
+
+如果匹配到关键词，使用 `sessions_spawn` 调用对应 Worker：
+
+```javascript
+// 数据分析任务
+sessions_spawn({
+  runtime: "subagent",
+  agentId: "worker-data",
+  task: "[详细任务描述，包含上下文]",
+  timeoutSeconds: 300
+})
+
+// 文档处理任务
+sessions_spawn({
+  runtime: "subagent", 
+  agentId: "worker-doc",
+  task: "[详细任务描述]",
+  timeoutSeconds: 300
+})
+
+// 网络搜索任务
+sessions_spawn({
+  runtime: "subagent",
+  agentId: "worker-web", 
+  task: "[搜索关键词和要求]",
+  timeoutSeconds: 120
+})
+```
+
+**步骤 3: 结果处理**
+
+- 收集 Worker 返回的结果
+- 整合并格式化输出
+- 统一回复用户
+- 记录执行日志
+
+### 直接处理的情况
+
+以下情况不调用 Worker，由 main Agent 直接处理：
+- 日常问候对话
+- 系统管理操作
+- 未匹配到关键词的通用问题
+- 需要多 Worker 协作的复杂任务（先拆解再分发）
+
+### 负载均衡
+
+当前采用静态路由策略：
+- 根据任务类型匹配到对应 Worker
+- 未来可扩展为动态负载检测
+
+### 故障处理
+
+如果 Worker 调用失败：
+1. 记录错误信息
+2. 尝试重试一次
+3. 如仍失败，转由 main Agent 处理或告知用户
+4. 更新 Worker 状态为离线
+
+### 共享存储
+
+任务和结果存储位置：
+```
+~/.openclaw/workspace/cluster/shared/
+├── tasks/     # 待处理任务队列
+├── results/   # 任务结果缓存
+└── memory/    # 共享记忆
+```
+
+### 执行日志
+
+每次任务分发后记录：
+- 时间戳
+- 任务类型
+- 分配到的 Worker
+- 执行状态
+- 耗时
+
+日志位置：`memory/YYYY-MM-DD.md`
