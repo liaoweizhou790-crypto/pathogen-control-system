@@ -1,5 +1,15 @@
 }
 
+// 切换标签页
+function showTab(index) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', i === index);
+    });
+    document.querySelectorAll('.tab-content').forEach((c, i) => {
+        c.classList.toggle('active', i === index);
+    });
+}
+
 // 显示原生风格提示
 function showNativeToast(message) {
     if (isCapacitor() && Capacitor.Plugins && Capacitor.Plugins.Toast) {
