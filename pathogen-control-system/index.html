@@ -26,11 +26,12 @@
             <button class="tab active" onclick="showTab(0)">🧪 配比计算</button>
             <button class="tab" onclick="showTab(1)">📋 推荐浓度</button>
             <button class="tab" onclick="showTab(2)">🦠 传染病方案</button>
-            <button class="tab" onclick="showTab(3)">🔍 流调分析</button>
-            <button class="tab" onclick="showTab(4)">📁 技术文件</button>
-            <button class="tab" onclick="showTab(5)">📝 配比记录</button>
-            <button class="tab" onclick="showTab(6)">⭐ 常用方案</button>
-            <button class="tab" onclick="showTab(7)">🤖 AI配置</button>
+            <button class="tab" onclick="showTab(3)">🧬 病原数据库</button>
+            <button class="tab" onclick="showTab(4)">🔍 流调分析</button>
+            <button class="tab" onclick="showTab(5)">📁 技术文件</button>
+            <button class="tab" onclick="showTab(6)">📝 配比记录</button>
+            <button class="tab" onclick="showTab(7)">⭐ 常用方案</button>
+            <button class="tab" onclick="showTab(8)">🤖 AI配置</button>
         </div>
         
         <div class="content">
@@ -162,37 +163,43 @@
                 </div>
             </div>
             
-            <!-- 技术文件 -->
-            <div class="tab-content" id="tab-4">
-                <div class="file-upload">
-                    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
-                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📎 选择文件</button>
-                    <span style="margin-left: 10px; color: #666;">支持PDF、Word、Excel、PPT、TXT</span>
+            <!-- 病原数据库 -->
+            <div class="tab-content" id="tab-3">
+                <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🧬 病原微生物数据库</h3>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">查询400+种病原微生物的消毒方案，数据来源于《人间传染的病原微生物目录》（2023年版）</p>
                 </div>
-                <div id="fileList"></div>
-            </div>
-            
-            <!-- 配比记录 -->
-            <div class="tab-content" id="tab-5">
-                <div class="action-bar">
-                    <button class="btn btn-secondary" onclick="exportRecords()">📊 导出CSV</button>
-                    <button class="btn btn-danger" onclick="clearRecords()">🗑️ 清空记录</button>
+                
+                <div class="form-group">
+                    <label>搜索病原微生物</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="pathogenSearch" placeholder="输入病原名称、疾病名称或分类..." style="flex: 1;" onkeypress="searchPathogen(event)">
+                        <button class="btn btn-primary" onclick="searchPathogen()">🔍 搜索</button>
+                        <button class="btn btn-secondary" onclick="clearPathogenSearch()">🗑️ 清空</button>
+                    </div>
                 </div>
-                <div id="recordsList"></div>
-            </div>
-            
-            <!-- 常用方案 -->
-            <div class="tab-content" id="tab-6">
-                <div id="favoritesList"></div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <button class="btn btn-small" onclick="showHighRiskPathogens()" style="background: #e74c3c; color: white;">🔴 第一类病原</button>
+                    <button class="btn btn-small btn-secondary" onclick="showRespiratoryPathogens()">🫁 呼吸道传播</button>
+                    <button class="btn btn-small btn-secondary" onclick="showBloodPathogens()">🩸 血液传播</button>
+                </div>
+                
+                <div id="pathogenResult">
+                    <div class="empty-state">
+                        <p>🔍 请输入关键词搜索病原微生物</p>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">数据来源：《人间传染的病原微生物目录》（2023年版）</p>
+                    </div>
+                </div>
+                
+                <div id="pathogenDetail" style="display: none;"></div>
             </div>
             
             <!-- 流调分析 -->
-            <div class="tab-content" id="tab-3">
+            <div class="tab-content" id="tab-4">
                 <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <h3 style="color: #667eea; margin-bottom: 15px;">🔍 流调报告智能分析</h3>
-                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
-                        上传流调报告，AI自动识别可能的致病菌并推荐消毒方案。支持文本、图片、PDF格式。
-                    </p>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">上传流调报告，AI自动识别可能的致病菌并推荐消毒方案。支持文本、图片、PDF格式。</p>
                 </div>
                 
                 <!-- 输入方式选择 -->
@@ -276,8 +283,32 @@
                 <div id="analysisStatus" style="margin-top: 20px;"></div>
             </div>
             
-            <!-- AI配置 -->
+            <!-- 技术文件 -->
+            <div class="tab-content" id="tab-5">
+                <div class="file-upload">
+                    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📎 选择文件</button>
+                    <span style="margin-left: 10px; color: #666;">支持PDF、Word、Excel、PPT、TXT</span>
+                </div>
+                <div id="fileList"></div>
+            </div>
+            
+            <!-- 配比记录 -->
+            <div class="tab-content" id="tab-6">
+                <div class="action-bar">
+                    <button class="btn btn-secondary" onclick="exportRecords()">📊 导出CSV</button>
+                    <button class="btn btn-danger" onclick="clearRecords()">🗑️ 清空记录</button>
+                </div>
+                <div id="recordsList"></div>
+            </div>
+            
+            <!-- 常用方案 -->
             <div class="tab-content" id="tab-7">
+                <div id="favoritesList"></div>
+            </div>
+            
+            <!-- AI配置 -->
+            <div class="tab-content" id="tab-8">
                 <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <h3 style="color: #667eea; margin-bottom: 15px;">🤖 AI API 配置</h3>
                     <p style="color: #666; font-size: 13px; margin-bottom: 15px;">配置AI模型API，用于流调报告智能分析。支持OpenAI、Kimi、Claude等多种模型。</p>
@@ -355,6 +386,7 @@
     <!-- 功能模块 -->
     <script src="js/modules/calculator.js"></script>
     <script src="js/modules/disease-plan.js"></script>
+    <script src="js/modules/pathogen-db.js"></script>
     <script src="js/modules/ai-config.js"></script>
     <script src="js/modules/epidemic-analysis.js"></script>
     
