@@ -26,9 +26,11 @@
             <button class="tab active" onclick="showTab(0)">🧪 配比计算</button>
             <button class="tab" onclick="showTab(1)">📋 推荐浓度</button>
             <button class="tab" onclick="showTab(2)">🦠 传染病方案</button>
-            <button class="tab" onclick="showTab(3)">📁 技术文件</button>
-            <button class="tab" onclick="showTab(4)">📝 配比记录</button>
-            <button class="tab" onclick="showTab(5)">⭐ 常用方案</button>
+            <button class="tab" onclick="showTab(3)">🔍 流调分析</button>
+            <button class="tab" onclick="showTab(4)">📁 技术文件</button>
+            <button class="tab" onclick="showTab(5)">📝 配比记录</button>
+            <button class="tab" onclick="showTab(6)">⭐ 常用方案</button>
+            <button class="tab" onclick="showTab(7)">🤖 AI配置</button>
         </div>
         
         <div class="content">
@@ -161,7 +163,7 @@
             </div>
             
             <!-- 技术文件 -->
-            <div class="tab-content" id="tab-3">
+            <div class="tab-content" id="tab-4">
                 <div class="file-upload">
                     <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
                     <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📎 选择文件</button>
@@ -171,7 +173,7 @@
             </div>
             
             <!-- 配比记录 -->
-            <div class="tab-content" id="tab-4">
+            <div class="tab-content" id="tab-5">
                 <div class="action-bar">
                     <button class="btn btn-secondary" onclick="exportRecords()">📊 导出CSV</button>
                     <button class="btn btn-danger" onclick="clearRecords()">🗑️ 清空记录</button>
@@ -180,8 +182,161 @@
             </div>
             
             <!-- 常用方案 -->
-            <div class="tab-content" id="tab-5">
+            <div class="tab-content" id="tab-6">
                 <div id="favoritesList"></div>
+            </div>
+            
+            <!-- 流调分析 -->
+            <div class="tab-content" id="tab-3">
+                <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🔍 流调报告智能分析</h3>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
+                        上传流调报告，AI自动识别可能的致病菌并推荐消毒方案。支持文本、图片、PDF格式。
+                    </p>
+                </div>
+                
+                <!-- 输入方式选择 -->
+                <div class="form-group">
+                    <label>选择输入方式</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="setAnalysisMode('text')" id="modeText" style="flex: 1; min-width: 100px;">📝 文本输入</button>
+                        <button class="btn btn-secondary" onclick="setAnalysisMode('image')" id="modeImage" style="flex: 1; min-width: 100px;">🖼️ 图片上传</button>
+                        <button class="btn btn-secondary" onclick="setAnalysisMode('pdf')" id="modePdf" style="flex: 1; min-width: 100px;">📄 PDF上传</button>
+                    </div>
+                </div>
+                
+                <!-- 文本输入区域 -->
+                <div id="textInputArea" class="analysis-input-area">
+                    <div class="form-group">
+                        <label>粘贴流调报告内容</label>
+                        <textarea id="epidemicText" rows="10" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; resize: vertical;" placeholder="请粘贴流调报告文本内容..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- 图片上传区域 -->
+                <div id="imageInputArea" class="analysis-input-area" style="display: none;">
+                    <div class="form-group">
+                        <label>上传流调报告图片</label>
+                        <div id="imageDropZone" style="border: 2px dashed #667eea; border-radius: 10px; padding: 40px; text-align: center; background: #f8f9fa; cursor: pointer;" onclick="document.getElementById('epidemicImage').click()">
+                            <div style="font-size: 48px; margin-bottom: 15px;">📷</div>
+                            <div style="color: #667eea; font-weight: bold; margin-bottom: 10px;">点击或拖拽上传图片</div>
+                            <div style="color: #999; font-size: 13px;">支持 JPG、PNG、GIF 格式</div>
+                        </div>
+                        <input type="file" id="epidemicImage" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                        <div id="imagePreview" style="margin-top: 15px; display: none;">
+                            <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #ddd;">
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-secondary" onclick="clearImage()">🗑️ 清除图片</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PDF上传区域 -->
+                <div id="pdfInputArea" class="analysis-input-area" style="display: none;">
+                    <div class="form-group">
+                        <label>上传流调报告PDF</label>
+                        <div id="pdfDropZone" style="border: 2px dashed #667eea; border-radius: 10px; padding: 40px; text-align: center; background: #f8f9fa; cursor: pointer;" onclick="document.getElementById('epidemicPdf').click()">
+                            <div style="font-size: 48px; margin-bottom: 15px;">📑</div>
+                            <div style="color: #667eea; font-weight: bold; margin-bottom: 10px;">点击或拖拽上传PDF</div>
+                            <div style="color: #999; font-size: 13px;">支持 PDF 格式，最大 10MB</div>
+                        </div>
+                        <input type="file" id="epidemicPdf" accept=".pdf,application/pdf" style="display: none;" onchange="handlePdfUpload(event)">
+                        <div id="pdfPreview" style="margin-top: 15px; display: none;">
+                            <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #0066cc;">
+                                <div style="font-weight: bold; color: #004085; margin-bottom: 5px;">📄 已选择PDF文件</div>
+                                <div id="pdfFileName" style="color: #666; font-size: 14px;"></div>
+                                <div id="pdfExtractedText" style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px; max-height: 150px; overflow-y: auto; font-size: 13px; color: #333;"></div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-secondary" onclick="clearPdf()">🗑️ 清除PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分析按钮 -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="analyzeEpidemicReport()" style="padding: 15px 40px; font-size: 16px;">🤖 AI智能分析</button>
+                    <button class="btn btn-secondary" onclick="clearAnalysisInput()" style="margin-left: 10px;">🗑️ 清空</button>
+                </div>
+                
+                <!-- 分析结果 -->
+                <div id="analysisResult" style="margin-top: 25px; display: none;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #667eea; margin-bottom: 15px;">📊 分析结果</h4>
+                        <div id="rawContent" style="background: white; padding: 15px; border-radius: 8px; font-size: 13px; line-height: 1.6; max-height: 400px; overflow-y: auto;"></div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="applyRecommendedPlan()" style="flex: 1; min-width: 150px;">⚡ 应用推荐方案</button>
+                            <button class="btn btn-secondary" onclick="exportAnalysisResult()" style="flex: 1; min-width: 150px;">📄 导出结果</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="analysisStatus" style="margin-top: 20px;"></div>
+            </div>
+            
+            <!-- AI配置 -->
+            <div class="tab-content" id="tab-7">
+                <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🤖 AI API 配置</h3>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">配置AI模型API，用于流调报告智能分析。支持OpenAI、Kimi、Claude等多种模型。</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>选择AI模型提供商</label>
+                    <select id="aiProvider" onchange="updateAIConfigFields()">
+                        <option value="kimi">Kimi (Moonshot)</option>
+                        <option value="openai">OpenAI (GPT)</option>
+                        <option value="claude">Claude (Anthropic)</option>
+                        <option value="custom">自定义 API</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>API Base URL</label>
+                    <input type="text" id="aiBaseUrl" placeholder="https://api.moonshot.cn/v1">
+                    <small style="color: #999; font-size: 12px;">默认使用官方API地址</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="password" id="aiApiKey" placeholder="输入您的API密钥">
+                    <small style="color: #999; font-size: 12px;">密钥仅保存在本地，不会上传到服务器</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>模型名称</label>
+                    <input type="text" id="aiModel" placeholder="如：kimi-coding/k2p5">
+                </div>
+                
+                <div class="form-group">
+                    <label>温度 (Temperature)</label>
+                    <input type="range" id="aiTemperature" min="0" max="2" step="0.1" value="0.7" oninput="document.getElementById('tempValue').textContent = this.value">
+                    <span id="tempValue" style="color: #667eea; font-weight: bold;">0.7</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>最大Token数</label>
+                    <input type="number" id="aiMaxTokens" value="4096" min="512" max="8192" step="512">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="saveAIConfig()" style="flex: 1;">💾 保存配置</button>
+                    <button class="btn btn-secondary" onclick="testAIConnection()">🧪 测试连接</button>
+                    <button class="btn btn-secondary" onclick="resetAIConfig()">🔄 恢复默认</button>
+                </div>
+                
+                <div id="aiTestResult" style="margin-top: 15px;"></div>
+                
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-top: 20px; border-radius: 5px;">
+                    <h4 style="color: #856404; margin-bottom: 10px;">📋 常用模型配置示例</h4>
+                    <div style="font-size: 12px; color: #856404; line-height: 1.8;">
+                        <p><strong>Kimi:</strong> Base URL: https://api.moonshot.cn/v1 | 模型: kimi-coding/k2p5</p>
+                        <p><strong>OpenAI:</strong> Base URL: https://api.openai.com/v1 | 模型: gpt-4</p>
+                        <p><strong>Ollama:</strong> Base URL: http://localhost:11434/v1 | 模型: llama3.1</p>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -200,6 +355,8 @@
     <!-- 功能模块 -->
     <script src="js/modules/calculator.js"></script>
     <script src="js/modules/disease-plan.js"></script>
+    <script src="js/modules/ai-config.js"></script>
+    <script src="js/modules/epidemic-analysis.js"></script>
     
     <!-- 主程序 -->
     <script src="js/app.js"></script>
