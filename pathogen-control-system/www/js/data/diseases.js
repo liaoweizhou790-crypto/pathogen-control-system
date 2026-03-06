@@ -243,7 +243,6 @@
                     pathogen: "布鲁氏菌",
                     transmission: "接触感染动物、食用未煮熟肉制品",
                     level: "中",
-                    environment: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "30分钟" },
                     animal: { type: "焚烧", method: "深埋或焚烧", note: "病畜无害化处理" },
                     note: "重点动物检疫，生熟分开"
                 },
@@ -260,7 +259,6 @@
                     pathogen: "钩端螺旋体",
                     transmission: "接触疫水、皮肤黏膜",
                     level: "中",
-                    environment: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "30分钟" },
                     water: { type: "含氯消毒剂", conc: "5", unit: "mg/L", time: "30分钟" },
                     note: "重点控制鼠类和猪"
                 },
@@ -268,7 +266,6 @@
                     pathogen: "疟原虫",
                     transmission: "按蚊叮咬",
                     level: "中",
-                    environment: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "30分钟" },
                     mosquito: { type: "灭蚊", method: "灭蚊", note: "防蚊灭蚊为主" },
                     note: "无直接人传人，无需特殊消毒"
                 }
