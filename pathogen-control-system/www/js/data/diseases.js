@@ -123,6 +123,7 @@
                     transmission: "鼠类排泄物、呼吸道、消化道",
                     level: "中",
                     environment: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "60分钟" },
+                    air: { type: "二氧化氯", conc: "500", unit: "mg/L", method: "气溶胶喷雾", time: "30分钟" },
                     rodent: { type: "鼠类控制", method: "灭鼠", note: "同时进行鼠密度监测" },
                     excreta: { type: "含氯消毒剂", conc: "5000", unit: "mg/L", time: "60分钟" },
                     vomit: { type: "含氯消毒剂", conc: "10000", unit: "mg/L", time: "60分钟" },
