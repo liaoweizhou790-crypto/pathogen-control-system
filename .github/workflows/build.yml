@@ -23,6 +23,12 @@ jobs:
       with:
         node-version: '22'
     
+    - name: Sync www/index.html to root
+      working-directory: ./pathogen-control-system
+      run: |
+        cp www/index.html index.html
+        echo "✅ 已同步 www/index.html → index.html"
+    
     - name: Install dependencies
       working-directory: ./pathogen-control-system
       run: npm install
@@ -55,12 +61,12 @@ jobs:
         path: pathogen-control-system/apk-versions/${{ steps.version.outputs.version }}/*.apk
         retention-days: 90
     
-    - name: Commit APK to repository
+    - name: Commit changes
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add pathogen-control-system/apk-versions/
-        git diff --staged --quiet || (git commit -m "chore: 添加APK版本 ${{ steps.version.outputs.version }}" && git push)
+        git add pathogen-control-system/index.html pathogen-control-system/apk-versions/
+        git diff --staged --quiet || (git commit -m "chore: 同步index.html并添加APK版本 ${{ steps.version.outputs.version }}" && git push)
     
     - name: Create Release
       if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
