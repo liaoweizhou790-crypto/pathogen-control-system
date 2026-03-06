@@ -1543,7 +1543,19 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            event.target.classList.add('active');
+            // 如果有event对象（点击调用），给点击的按钮添加active类
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // 直接调用时，根据tabName找到对应的按钮
+                const tabMap = {
+                    'calc': 0, 'disease': 1, 'pathogen': 2, 'recommend': 3,
+                    'records': 4, 'presets': 5, 'epidemicAnalysis': 6, 'aiConfig': 7
+                };
+                const tabIndex = tabMap[tabName] || 0;
+                const tabs = document.querySelectorAll('.tab');
+                if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
+            }
             document.getElementById(tabName).classList.add('active');
         }
 
