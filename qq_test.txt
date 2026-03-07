@@ -1,0 +1,11 @@
+Subject: 邮箱状态测试
+From: 348270365@qq.com
+To: lwz4814507@163.com
+Content-Type: text/plain; charset=UTF-8
+
+📧 邮箱状态测试
+
+QQ邮箱：配置正常，IMAP可连接
+163邮箱：SMTP认证失败（需要重新获取授权码）
+
+发送时间：2026-03-05 11:22

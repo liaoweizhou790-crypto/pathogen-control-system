@@ -1,0 +1,50 @@
+# SearXNG 配置文件
+use_default_settings: true
+
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+  secret_key: "searxng_secret_key_change_in_production"
+  limiter: false
+
+search:
+  safe_search: 0
+  autocomplete: 'google'
+  default_lang: 'zh'
+
+ui:
+  static_path: ""
+  templates_path: ""
+  default_theme: simple
+  default_locale: zh
+
+outgoing:
+  request_timeout: 10.0
+  max_request_timeout: 15.0
+  pool_connections: 100
+  pool_maxsize: 20
+  enable_http2: true
+
+engines:
+  - name: google
+    engine: google
+    shortcut: go
+    disabled: false
+  - name: bing
+    engine: bing
+    shortcut: bi
+    disabled: false
+  - name: baidu
+    engine: baidu
+    shortcut: bd
+    disabled: false
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    disabled: false
+
+enabled_plugins:
+  - 'Hash plugin'
+  - 'Self Informations'
+  - 'Tracker URL remover'
+  - 'Ahmia blacklist'

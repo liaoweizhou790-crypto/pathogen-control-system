@@ -1,0 +1,135 @@
+// 全局变量
+:root {
+  // 主色调
+  --primary-color: #1890FF;
+  --primary-light: #40A9FF;
+  --primary-dark: #096DD9;
+  
+  // 功能色
+  --success-color: #52C41A;
+  --warning-color: #FAAD14;
+  --error-color: #F5222D;
+  --info-color: #1890FF;
+  
+  // 中性色
+  --text-primary: #262626;
+  --text-secondary: #595959;
+  --text-tertiary: #8C8C8C;
+  --border-color: #D9D9D9;
+  --background-color: #F5F5F5;
+  --card-background: #FFFFFF;
+  
+  // 病媒专属色
+  --mosquito-color: #722ED1;
+  --fly-color: #FA8C16;
+  --cockroach-color: #52C41A;
+  --rodent-color: #F5222D;
+  --tick-color: #13C2C2;
+  
+  // 间距
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  
+  // 圆角
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+
+// 全局样式
+.page-container {
+  padding: var(--space-lg);
+  min-height: calc(100vh - 64px);
+}
+
+.card {
+  background: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+// 统计卡片
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-lg);
+  border-radius: var(--border-radius-lg);
+  background: var(--card-background);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s;
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+  
+  .icon {
+    font-size: 32px;
+    margin-bottom: var(--space-sm);
+  }
+  
+  .value {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .label {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    margin-top: var(--space-xs);
+  }
+  
+  .trend {
+    margin-top: var(--space-sm);
+    font-size: 12px;
+    
+    &.up {
+      color: var(--error-color);
+    }
+    
+    &.down {
+      color: var(--success-color);
+    }
+  }
+}
+
+// 病媒类型标签
+.vector-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  
+  &.mosquito {
+    background: rgba(114, 46, 209, 0.1);
+    color: var(--mosquito-color);
+  }
+  
+  &.fly {
+    background: rgba(250, 140, 22, 0.1);
+    color: var(--fly-color);
+  }
+  
+  &.cockroach {
+    background: rgba(82, 196, 26, 0.1);
+    color: var(--cockroach-color);
+  }
+  
+  &.rodent {
+    background: rgba(245, 34, 45, 0.1);
+    color: var(--rodent-color);
+  }
+  
+  &.tick {
+    background: rgba(19, 194, 194, 0.1);
+    color: var(--tick-color);
+  }
+}

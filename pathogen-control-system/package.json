@@ -1,7 +1,8 @@
 {
   "name": "pathogen-control-system",
   "version": "1.6.1",
-  "description": "柳州市疾病预防控制中心病原微生物防控系统 v1.6.1 - 符合GB19193-2025标准","main": "index.html",
+  "description": "柳州市疾病预防控制中心病原微生物防控系统 v1.6.1 - 符合GB19193-2025标准",
+  "main": "index.html",
   "scripts": {
     "build": "echo 'Build complete'",
     "sync": "npx cap sync",

@@ -1,0 +1,253 @@
+#!/bin/bash
+# Desktop Control Wrapper for OpenClaw
+# 基于 cliclick 的 macOS 桌面控制工具
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# 帮助信息
+show_help() {
+    cat << EOF
+🖥️  OpenClaw Desktop Control Tool
+
+用法: $0 <command> [options]
+
+命令:
+  mouse move <x> <y>      移动鼠标到指定位置
+  mouse click [<x> <y>]   点击（可指定位置）
+  mouse double-click      双击
+  mouse right-click       右键点击
+  mouse scroll <num>     滚动（正数上滚，负数下滚）
+  mouse drag <x> <y>     拖拽到指定位置
+  mouse position          获取当前鼠标位置
+  
+  keyboard type "<text>" 输入文字
+  keyboard press <key>   按下单个键
+  keyboard hotkey <keys> 快捷键组合（如 cmd,c）
+  
+  screenshot [file]       截图（默认保存到桌面）
+  
+  app open "<name>"      打开应用
+  app list                列出运行中的应用
+  
+  screen size             获取屏幕分辨率
+
+示例:
+  $0 mouse move 500 300
+  $0 mouse click
+  $0 keyboard type "Hello World"
+  $0 keyboard hotkey cmd,space
+  $0 screenshot ~/Desktop/capture.png
+  $0 app open "Safari"
+
+⚠️  注意: 首次使用需要在 系统设置 -> 隐私与安全性 -> 辅助功能 中授权终端应用
+EOF
+}
+
+# 检查 cliclick
+if ! command -v cliclick &> /dev/null; then
+    echo -e "${RED}❌ 错误: cliclick 未安装${NC}"
+    echo "正在尝试安装..."
+    brew install cliclick
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}安装失败，请手动运行: brew install cliclick${NC}"
+        exit 1
+    fi
+fi
+
+# 解析命令
+COMMAND="$1"
+SUBCOMMAND="$2"
+
+# 主命令处理
+case "$COMMAND" in
+    "mouse")
+        case "$SUBCOMMAND" in
+            "move")
+                X="$3"
+                Y="$4"
+                if [ -z "$X" ] || [ -z "$Y" ]; then
+                    echo -e "${RED}❌ 错误: 需要提供 x 和 y 坐标${NC}"
+                    echo "用法: $0 mouse move <x> <y>"
+                    exit 1
+                fi
+                cliclick "m:${X},${Y}"
+                echo -e "${GREEN}✅ 鼠标已移动到 (${X}, ${Y})${NC}"
+                ;;
+            "click")
+                X="$3"
+                Y="$4"
+                if [ -n "$X" ] && [ -n "$Y" ]; then
+                    cliclick "c:${X},${Y}"
+                    echo -e "${GREEN}✅ 已在 (${X}, ${Y}) 点击${NC}"
+                else
+                    cliclick c:.
+                    echo -e "${GREEN}✅ 已点击当前位置${NC}"
+                fi
+                ;;
+            "double-click")
+                cliclick dc:.
+                echo -e "${GREEN}✅ 已双击${NC}"
+                ;;
+            "right-click")
+                cliclick rc:.
+                echo -e "${GREEN}✅ 已右键点击${NC}"
+                ;;
+            "scroll")
+                NUM="$3"
+                if [ -z "$NUM" ]; then
+                    echo -e "${RED}❌ 错误: 需要提供滚动数值${NC}"
+                    exit 1
+                fi
+                # cliclick 使用 scroll 命令
+                cliclick "scroll:${NUM}"
+                echo -e "${GREEN}✅ 已滚动 ${NUM}${NC}"
+                ;;
+            "drag")
+                X="$3"
+                Y="$4"
+                if [ -z "$X" ] || [ -z "$Y" ]; then
+                    echo -e "${RED}❌ 错误: 需要提供目标坐标${NC}"
+                    exit 1
+                fi
+                cliclick "dd:${X},${Y}"
+                echo -e "${GREEN}✅ 已拖拽到 (${X}, ${Y})${NC}"
+                ;;
+            "position")
+                # 使用 AppleScript 获取鼠标位置
+                POS=$(osascript -e 'tell application "System Events" to get mouse location' 2>/dev/null)
+                echo -e "${GREEN}📍 当前鼠标位置: ${POS}${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ 未知的鼠标命令: $SUBCOMMAND${NC}"
+                show_help
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    "keyboard")
+        case "$SUBCOMMAND" in
+            "type")
+                TEXT="$3"
+                if [ -z "$TEXT" ]; then
+                    echo -e "${RED}❌ 错误: 需要提供文字${NC}"
+                    exit 1
+                fi
+                cliclick "t:${TEXT}"
+                echo -e "${GREEN}✅ 已输入文字${NC}"
+                ;;
+            "press")
+                KEY="$3"
+                if [ -z "$KEY" ]; then
+                    echo -e "${RED}❌ 错误: 需要提供按键${NC}"
+                    exit 1
+                fi
+                cliclick "kp:${KEY}"
+                echo -e "${GREEN}✅ 已按下 ${KEY}${NC}"
+                ;;
+            "hotkey")
+                KEYS="$3"
+                if [ -z "$KEYS" ]; then
+                    echo -e "${RED}❌ 错误: 需要提供快捷键组合${NC}"
+                    echo "格式: key1,key2,... (如 cmd,c)"
+                    exit 1
+                fi
+                # 转换按键格式
+                IFS=',' read -ra KEY_ARRAY <<< "$KEYS"
+                MODIFIERS=""
+                MAIN_KEY=""
+                
+                for key in "${KEY_ARRAY[@]}"; do
+                    key=$(echo "$key" | tr -d ' ')
+                    case "$key" in
+                        "ctrl") MODIFIERS="${MODIFIERS}ctrl," ;;
+                        "cmd"|"command") MODIFIERS="${MODIFIERS}cmd," ;;
+                        "alt"|"option") MODIFIERS="${MODIFIERS}alt," ;;
+                        "shift") MODIFIERS="${MODIFIERS}shift," ;;
+                        *) MAIN_KEY="$key" ;;
+                    esac
+                done
+                
+                # 构建 cliclick 命令
+                if [ -n "$MODIFIERS" ]; then
+                    MODIFIERS="${MODIFIERS%,}"  # 移除末尾逗号
+                    cliclick "kd:${MODIFIERS}"
+                    sleep 0.1
+                    cliclick "kp:${MAIN_KEY}"
+                    sleep 0.1
+                    cliclick "ku:${MODIFIERS}"
+                else
+                    cliclick "kp:${MAIN_KEY}"
+                fi
+                echo -e "${GREEN}✅ 已执行快捷键 ${KEYS}${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ 未知的键盘命令: $SUBCOMMAND${NC}"
+                show_help
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    "screenshot")
+        FILE="${2:-$HOME/Desktop/screenshot_$(date +%Y%m%d_%H%M%S).png}"
+        screencapture -x "$FILE"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✅ 截图已保存: ${FILE}${NC}"
+        else
+            echo -e "${RED}❌ 截图失败${NC}"
+            exit 1
+        fi
+        ;;
+    
+    "app")
+        case "$SUBCOMMAND" in
+            "open")
+                APP="$3"
+                if [ -z "$APP" ]; then
+                    echo -e "${RED}❌ 错误: 需要提供应用名称${NC}"
+                    exit 1
+                fi
+                open -a "$APP"
+                echo -e "${GREEN}✅ 已打开 ${APP}${NC}"
+                ;;
+            "list")
+                echo -e "${YELLOW}📱 运行中的应用:${NC}"
+                osascript -e 'tell application "System Events" to get name of (processes where background only is false)' 2>/dev/null | tr ',' '\n' | sed 's/^ //' | nl
+                ;;
+            *)
+                echo -e "${RED}❌ 未知的应用命令: $SUBCOMMAND${NC}"
+                show_help
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    "screen")
+        case "$SUBCOMMAND" in
+            "size")
+                SIZE=$(osascript -e 'tell application "Finder" to get bounds of window of desktop' 2>/dev/null)
+                echo -e "${GREEN}🖥️  屏幕分辨率: ${SIZE}${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ 未知的屏幕命令: $SUBCOMMAND${NC}"
+                show_help
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    "help"|"-h"|"--help")
+        show_help
+        ;;
+    
+    *)
+        echo -e "${RED}❌ 未知命令: $COMMAND${NC}"
+        show_help
+        exit 1
+        ;;
+esac
