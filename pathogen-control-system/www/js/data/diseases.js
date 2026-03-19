@@ -154,24 +154,88 @@
                     note: "无特效疫苗，以灭蚊为主"
                 },
                 "猴痘": {
-                    pathogen: "猴痘病毒",
-                    transmission: "密切接触、飞沫、污染物",
+                    pathogen: "猴痘病毒(Mpox virus, MPXV)",
+                    pathogenDetail: {
+                        classification: "痘病毒科正痘病毒属",
+                        genome: "双链DNA病毒，全长约197kb",
+                        branches: "分支I(中非分支)、分支II(西非分支，含IIa、IIb)",
+                        currentStrain: "IIb分支(我国病例均为IIb)",
+                        heatSensitivity: "56℃ 30分钟或60℃ 10分钟灭活",
+                        resistance: "耐干燥和低温，在物体表面可生存数月"
+                    },
+                    transmission: "经黏膜和破损皮肤侵入；性接触传播(MSM人群为主)、直接接触病变皮肤/黏膜、间接接触污染物、呼吸道飞沫、动物源性",
+                    transmissionDetail: {
+                        primary: "经黏膜和破损皮肤侵入人体",
+                        sexual: "MSM人群经性接触传播(2022年以来主要途径)",
+                        direct: "直接接触病例病变皮肤或黏膜",
+                        indirect: "接触被病毒污染的物品",
+                        respiratory: "长时间近距离吸入病例呼吸道飞沫",
+                        zoonotic: "接触感染动物分泌物或被咬伤、抓伤"
+                    },
                     level: "高",
-                    environment: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "60分钟" },
-                    fabric: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "60分钟" },
-                    skin: { type: "碘伏", conc: "0.5", unit: "%", method: "皮肤消毒" },
-                    note: "病毒抵抗力较强，消毒浓度要高，注意个人防护"
+                    incubation: "5-21天，多为6-13天",
+                    infectiousPeriod: "症状出现至皮疹结痂自然脱落；症状前1-4天可能已排毒",
+                    caseFatalityRate: "2022年以来约0.1%",
+                    environment: { type: "含氯消毒剂/过氧乙酸", conc: "1000", unit: "mg/L", time: "60分钟", note: "含氯消毒剂或过氧乙酸均可有效灭活病毒" },
+                    fabric: { type: "含氯消毒剂/季铵盐类/热力消毒", conc: "按产品说明", unit: "", time: "按设备要求", note: "单独洗涤和消毒，可选择热力消毒、含氯消毒剂或季铵盐类消毒剂浸泡" },
+                    skin: { type: "75%乙醇", conc: "75", unit: "%", method: "擦拭消毒", note: "接触病例后立即消毒" },
+                    food: { type: "热力消毒/含氯消毒剂/季铵盐类", conc: "按产品说明", unit: "", time: "按设备要求", note: "餐具首选热力消毒，或含氯消毒剂、季铵盐类消毒剂浸泡" },
+                    medicalInstrument: { type: "戊二醛/邻苯二甲醛", conc: "按产品说明", unit: "", time: "按产品要求", note: "医疗器械专用，按《医疗机构消毒技术规范》执行" },
+                    air: { type: "紫外线/过氧化氢", method: "适当辐照强度照射/喷雾", note: "空气消毒可用紫外线照射或过氧化氢喷雾" },
+                    isolation: {
+                        standard: "皮疹结痂自然脱落并形成新皮肤",
+                        closeContact: "最后密切接触之日起21天健康监测",
+                        homeIsolation: "单人单间，避免皮肤/黏膜接触，做好物品消毒",
+                        reportTime: "24小时内网络直报；首例或2例关联病例2小时内报告"
+                    },
+                    specimen: {
+                        primary: "皮肤或黏膜病变部位标本",
+                        oropharyngeal: "口咽拭子标本",
+                        serum: "急性期和恢复期双份血清"
+                    },
+                    ppe: {
+                        gloves: "一次性乳胶手套",
+                        mask: "KN95/N95及以上级别口罩",
+                        faceShield: "防护面屏或护目镜",
+                        gown: "一次性隔离衣",
+                        handHygiene: "严格执行手卫生"
+                    },
+                    note: "病毒抵抗力较强，消毒浓度要高，注意个人防护；重点人群：MSM人群需加强宣传教育和检测"
                 },
                 "肺结核": {
-                    pathogen: "结核分枝杆菌",
-                    transmission: "呼吸道飞沫",
+                    pathogen: "结核分枝杆菌(Mycobacterium tuberculosis)",
+                    pathogenDetail: {
+                        classification: "分枝杆菌科分枝杆菌属",
+                        characteristics: "抗酸染色阳性，生长缓慢，对干燥、酸碱抵抗力强",
+                        resistance: "对干燥抵抗力强，对湿热敏感，对紫外线敏感"
+                    },
+                    transmission: "呼吸道飞沫传播（主要），尘埃传播（次要）",
+                    transmissionDetail: {
+                        primary: "呼吸道飞沫传播",
+                        secondary: "尘埃传播（痰液干燥后随尘埃飞扬）",
+                        note: "飞沫核直径1-5μm，可悬浮于空气中数小时"
+                    },
                     level: "中",
-                    environment: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "60分钟" },
-                    air: { type: "二氧化氯", conc: "500", unit: "mg/L", method: "气溶胶喷雾", time: "30分钟" },
-                    sputum: { type: "含氯消毒剂", conc: "5000", unit: "mg/L", time: "60分钟" },
-                    excreta: { type: "含氯消毒剂", conc: "2000", unit: "mg/L", time: "60分钟" },
-                    vomit: { type: "含氯消毒剂", conc: "5000", unit: "mg/L", time: "60分钟" },
-                    note: "结核杆菌抵抗力强，需延长消毒时间"
+                    incubation: "4-8周（感染到发病），潜伏感染可持续终生",
+                    infectiousPeriod: "涂阳患者整个治疗期间，治疗2周后传染性大幅下降",
+                    environment: { type: "含氯消毒剂", conc: "1000-2000", unit: "mg/L", time: "30分钟", note: "常规消毒；作用30分钟后用清水擦拭" },
+                    air: { type: "紫外线/过氧乙酸", conc: "紫外线1.5W/m³或过氧乙酸0.2%-0.5%", unit: "", time: "30-60分钟", method: "紫外线照射或过氧乙酸喷雾", note: "紫外线消毒需在无人状态下进行，辐照强度≥70μW/cm²" },
+                    sputum: { type: "含氯消毒剂", conc: "5000-10000", unit: "mg/L", time: "≥2小时（常规）或≥6小时（大量）", note: "痰液与消毒剂比例为1:2，使用带盖耐腐蚀容器" },
+                    fabric: { type: "清洗后消毒/一次性使用", method: "清洗后消毒或焚烧", note: "患者使用过的床单被罩可清洗后消毒，或采用一次性用品" },
+                    medicalInstrument: { type: "高水平消毒或灭菌", method: "按《医疗机构消毒技术规范》执行", note: "根据器械风险等级选择消毒或灭菌方法" },
+                    ventilation: { method: "自然通风/机械通风", frequency: "每日至少3次", duration: "每次≥30分钟", note: "优先自然通风，保证诊室和病区良好通风" },
+                    ppe: {
+                        patient: "医用外科口罩",
+                        healthcare: "医用防护口罩（N95及以上）",
+                        note: "患者佩戴医用外科口罩，医护人员佩戴N95口罩"
+                    },
+                    school: {
+                        ventilation: "每日早中晚通风，每次≥30分钟",
+                        uvDisinfection: "紫外线灯1.5W/m³，照射30-60分钟，无人状态下使用",
+                        surfaceDisinfection: "含氯消毒剂500-1000mg/L，每日擦拭",
+                        epidemicDisinfection: "疫情发生后每日消毒2次，连续14天"
+                    },
+                    note: "结核杆菌抵抗力强，痰液消毒是关键；患者需佩戴外科口罩，医护人员佩戴N95；重点做好通风和痰液消毒"
                 },
                 "伤寒和副伤寒": {
                     pathogen: "伤寒沙门菌、副伤寒沙门菌",

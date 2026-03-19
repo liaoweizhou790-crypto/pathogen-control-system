@@ -1,31 +1,112 @@
         function showDiseasePlan() {
             const diseaseClass = document.getElementById('diseaseClass').value;
             const diseaseName = document.getElementById('diseaseName').value;
-            
+
             if (!diseaseClass || !diseaseName || !diseaseDB[diseaseClass][diseaseName]) {
                 document.getElementById('diseasePlan').style.display = 'none';
                 return;
             }
-            
+
             const plan = diseaseDB[diseaseClass][diseaseName];
             document.getElementById('planTitle').textContent = `📋 ${diseaseName} 消毒方案`;
-            
+
             let content = `
                 <div style="margin-bottom: 15px;">
                     <span class="tag">${diseaseClass}传染病</span>
                     <span class="tag">危险等级: ${plan.level}</span>
                 </div>
-                <div class="result-item"><strong>病原体:</strong> ${plan.pathogen}</div>
-                <div class="result-item"><strong>传播途径:</strong> ${plan.transmission}</div>
             `;
-            
+
+            // 病原体详细信息
+            if (plan.pathogenDetail) {
+                content += `<div class="result-item" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <strong style="color: #1565c0; font-size: 1.1em;">🧬 病原体特征</strong><br>
+                    <div style="margin-top: 8px; padding-left: 10px;">
+                        <strong>分类:</strong> ${plan.pathogenDetail.classification}<br>
+                        <strong>基因组:</strong> ${plan.pathogenDetail.genome}<br>
+                        <strong>分支:</strong> ${plan.pathogenDetail.branches}<br>
+                        <strong style="color: #d32f2f;">当前流行株:</strong> ${plan.pathogenDetail.currentStrain}<br>
+                        <strong>理化特性:</strong> ${plan.pathogenDetail.resistance}；${plan.pathogenDetail.heatSensitivity}
+                    </div>
+                </div>`;
+            } else {
+                content += `<div class="result-item"><strong>病原体:</strong> ${plan.pathogen}</div>`;
+            }
+
+            // 潜伏期/传染期等技术参数
+            if (plan.incubation || plan.infectiousPeriod || plan.caseFatalityRate) {
+                content += `<div class="result-item" style="background: #f3e5f5; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                    <strong style="color: #7b1fa2;">📊 技术参数</strong><br>
+                    <div style="margin-top: 5px; padding-left: 10px;">`;
+                if (plan.incubation) content += `<strong>潜伏期:</strong> ${plan.incubation}<br>`;
+                if (plan.infectiousPeriod) content += `<strong>传染期:</strong> ${plan.infectiousPeriod}<br>`;
+                if (plan.caseFatalityRate) content += `<strong>病死率:</strong> ${plan.caseFatalityRate}`;
+                content += `</div></div>`;
+            }
+
+            // 传播途径详细信息
+            if (plan.transmissionDetail) {
+                content += `<div class="result-item" style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <strong style="color: #e65100; font-size: 1.1em;">📢 传播途径</strong><br>
+                    <div style="margin-top: 8px; padding-left: 10px;">
+                        <div style="background: #ffccbc; padding: 8px; border-radius: 5px; margin-bottom: 8px;"><strong>🔴 主要侵入:</strong> ${plan.transmissionDetail.primary}</div>
+                        ${plan.transmissionDetail.sexual ? `<div style="background: #ffebee; padding: 8px; border-radius: 5px; margin-bottom: 5px;"><strong>⚠️ 性接触传播:</strong> ${plan.transmissionDetail.sexual}</div>` : ''}
+                        <strong>• 直接接触:</strong> ${plan.transmissionDetail.direct}<br>
+                        <strong>• 间接接触:</strong> ${plan.transmissionDetail.indirect}<br>
+                        <strong>• 呼吸道:</strong> ${plan.transmissionDetail.respiratory}<br>
+                        ${plan.transmissionDetail.zoonotic ? `<strong>• 动物源性:</strong> ${plan.transmissionDetail.zoonotic}` : ''}
+                    </div>
+                </div>`;
+            } else {
+                content += `<div class="result-item"><strong>传播途径:</strong> ${plan.transmission}</div>`;
+            }
+
+            // 病例管理要求
+            if (plan.isolation) {
+                content += `<div class="result-item" style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <strong style="color: #2e7d32; font-size: 1.1em;">🏥 病例管理</strong><br>
+                    <div style="margin-top: 8px; padding-left: 10px;">
+                        <strong>✅ 解除隔离标准:</strong> ${plan.isolation.standard}<br>
+                        <strong>👥 密接监测:</strong> ${plan.isolation.closeContact}<br>
+                        <strong>🏠 居家隔离:</strong> ${plan.isolation.homeIsolation}<br>
+                        <strong>📢 报告时限:</strong> ${plan.isolation.reportTime}
+                    </div>
+                </div>`;
+            }
+
+            // 标本采集要求
+            if (plan.specimen) {
+                content += `<div class="result-item" style="background: #e0f7fa; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                    <strong style="color: #00838f;">🧫 标本采集</strong><br>
+                    <div style="margin-top: 5px; padding-left: 10px;">
+                        <strong>首选:</strong> ${plan.specimen.primary}<br>
+                        <strong>同时采集:</strong> ${plan.specimen.oropharyngeal}<br>
+                        <strong>血清:</strong> ${plan.specimen.serum}
+                    </div>
+                </div>`;
+            }
+
+            // 个人防护装备
+            if (plan.ppe) {
+                content += `<div class="result-item" style="background: #fce4ec; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                    <strong style="color: #c2185b;">🛡️ 个人防护装备(PPE)</strong><br>
+                    <div style="margin-top: 5px; padding-left: 10px;">
+                        • ${plan.ppe.mask}<br>
+                        • ${plan.ppe.gloves}<br>
+                        • ${plan.ppe.faceShield}<br>
+                        • ${plan.ppe.gown}<br>
+                        • ${plan.ppe.handHygiene}
+                    </div>
+                </div>`;
+            }
+
             // 环境消毒
             if (plan.environment) {
                 const isChlorineEnv = plan.environment.type.includes('含氯');
                 const concDisplayEnv = isChlorineEnv ? `（有效氯含量${plan.environment.conc}）` : `${plan.environment.conc}`;
                 content += `<div class="result-item"><strong>环境表面消毒:</strong> ${plan.environment.type} ${concDisplayEnv}${plan.environment.unit}，作用${plan.environment.time}</div>`;
             }
-            
+
             // 空气消毒
             if (plan.air) {
                 if (plan.air.method && !plan.air.type) {
@@ -38,7 +119,7 @@
                     content += `<div class="result-item"><strong>空气消毒:</strong> ${plan.air.type} ${concDisplayAir}${plan.air.unit}，${plan.air.method}，作用${plan.air.time}</div>`;
                 }
             }
-            
+
             // 织物消毒
             if (plan.fabric) {
                 if (plan.fabric.method) {
@@ -51,28 +132,28 @@
                     content += `<div class="result-item"><strong>织物消毒:</strong> ${plan.fabric.type} ${concDisplayFabric}${plan.fabric.unit}，作用${plan.fabric.time}</div>`;
                 }
             }
-            
+
             // 排泄物消毒
             if (plan.excreta) {
                 const isChlorineExcreta = plan.excreta.type.includes('含氯');
                 const concDisplayExcreta = isChlorineExcreta ? `（有效氯含量${plan.excreta.conc}）` : `${plan.excreta.conc}`;
                 content += `<div class="result-item"><strong>排泄物消毒:</strong> ${plan.excreta.type} ${concDisplayExcreta}${plan.excreta.unit}，作用${plan.excreta.time}</div>`;
             }
-            
+
             // 呕吐物消毒
             if (plan.vomit) {
                 const isChlorineVomit = plan.vomit.type.includes('含氯');
                 const concDisplayVomit = isChlorineVomit ? `（有效氯含量${plan.vomit.conc}）` : `${plan.vomit.conc}`;
                 content += `<div class="result-item"><strong>呕吐物消毒:</strong> ${plan.vomit.type} ${concDisplayVomit}${plan.vomit.unit}，作用${plan.vomit.time}</div>`;
             }
-            
+
             // 血液消毒
             if (plan.blood) {
                 const isChlorineBlood = plan.blood.type.includes('含氯');
                 const concDisplayBlood = isChlorineBlood ? `（有效氯含量${plan.blood.conc}）` : `${plan.blood.conc}`;
                 content += `<div class="result-item"><strong>血液体液消毒:</strong> ${plan.blood.type} ${concDisplayBlood}${plan.blood.unit}，作用${plan.blood.time}</div>`;
             }
-            
+
             // 餐饮具消毒
             if (plan.food) {
                 if (plan.food.method) {
@@ -85,7 +166,7 @@
                     content += `<div class="result-item"><strong>餐饮具消毒:</strong> ${plan.food.type} ${concDisplayFood}${plan.food.unit}，作用${plan.food.time}</div>`;
                 }
             }
-            
+
             // 器械消毒
             if (plan.instrument) {
                 if (plan.instrument.method) {
@@ -98,29 +179,44 @@
                     content += `<div class="result-item"><strong>医疗器械消毒:</strong> ${plan.instrument.type} ${concDisplayInst}${plan.instrument.unit}，作用${plan.instrument.time}</div>`;
                 }
             }
-            
+
+            // 皮肤/手消毒（新增）
+            if (plan.skin) {
+                content += `<div class="result-item" style="background: #e8f5e9;"><strong>🖐️ 皮肤/手消毒:</strong> ${plan.skin.type} ${plan.skin.conc}${plan.skin.unit}`;
+                if (plan.skin.method) content += `，${plan.skin.method}`;
+                if (plan.skin.note) content += `（${plan.skin.note}）`;
+                content += `</div>`;
+            }
+
+            // 医疗器械专用消毒（新增）
+            if (plan.medicalInstrument) {
+                content += `<div class="result-item" style="background: #f3e5f5;"><strong>🔬 医疗器械专用消毒:</strong> ${plan.medicalInstrument.type}`;
+                if (plan.medicalInstrument.note) content += `（${plan.medicalInstrument.note}）`;
+                content += `</div>`;
+            }
+
             // 尸体处理
             if (plan.corpse) {
                 content += `<div class="result-item"><strong>尸体处理:</strong> ${plan.corpse.method}`;
                 if (plan.corpse.note) content += `，${plan.corpse.note}`;
                 content += `</div>`;
             }
-            
+
             // 灭蚤处理（鼠疫专用）
             if (plan.flea) {
                 content += `<div class="result-item"><strong>🐭 灭蚤处理:</strong> ${plan.flea.method}`;
                 if (plan.flea.note) content += `，${plan.flea.note}`;
                 content += `</div>`;
             }
-            
+
             // 特殊说明
             if (plan.note) {
                 content += `<div class="steps" style="background: #fff3cd; border-left-color: #ffc107;"><strong>⚠️ 特别说明:</strong> ${plan.note}</div>`;
             }
-            
+
             document.getElementById('planContent').innerHTML = content;
             document.getElementById('diseasePlan').style.display = 'block';
-            
+
             // 保存当前方案供应用使用
             window.currentDiseasePlan = {
                 name: diseaseName,
@@ -128,10 +224,10 @@
                 data: plan
             };
         }
-        
+
         function applyDiseasePlan() {
             if (!window.currentDiseasePlan) return;
-            
+
             const plan = window.currentDiseasePlan.data;
             // 优先使用环境消毒参数
             if (plan.environment) {
@@ -145,11 +241,11 @@
                     "75%乙醇": "醇类",
                     "碘伏": "其他"
                 };
-                
+
                 const category = categoryMap[plan.environment.type] || "含氯消毒剂";
                 document.getElementById('category').value = category;
                 updateDisinfectants();
-                
+
                 // 选择具体消毒剂
                 const disinfectantSelect = document.getElementById('disinfectant');
                 for (let i = 0; i < disinfectantSelect.options.length; i++) {
@@ -160,7 +256,7 @@
                     }
                 }
                 updateConcentration();
-                
+
                 // 设置目标浓度
                 document.getElementById('targetConc').value = plan.environment.conc;
                 const unitSelect = document.getElementById('targetUnit');
@@ -170,22 +266,22 @@
                     unitSelect.value = "%";
                 }
             }
-            
+
             // 切换到计算标签
             document.querySelectorAll('.tab')[0].click();
             alert(`已应用 ${window.currentDiseasePlan.name} 的消毒方案参数，请检查并点击计算`);
         }
-        
+
         function exportDiseasePlan() {
             if (!window.currentDiseasePlan) return;
-            
+
             const plan = window.currentDiseasePlan.data;
             let text = `${window.currentDiseasePlan.name} 消毒方案\n`;
             text += `传染病类别: ${window.currentDiseasePlan.class}类\n`;
             text += `病原体: ${plan.pathogen}\n`;
             text += `传播途径: ${plan.transmission}\n`;
             text += `危险等级: ${plan.level}\n\n`;
-            
+
             if (plan.environment) {
                 text += `环境消毒: ${plan.environment.type} ${plan.environment.conc}${plan.environment.unit}，作用${plan.environment.time}\n`;
             }
@@ -200,7 +296,7 @@
             if (plan.note) {
                 text += `\n特别说明: ${plan.note}\n`;
             }
-            
+
             const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -212,7 +308,7 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
+
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
         }
@@ -222,7 +318,7 @@
             const category = document.getElementById('category').value;
             const select = document.getElementById('disinfectant');
             select.innerHTML = '<option value="">请选择</option>';
-            
+
             if (category && disinfectantDB[category]) {
                 Object.keys(disinfectantDB[category]).forEach(name => {
                     const option = document.createElement('option');
@@ -237,18 +333,18 @@
         function updateConcentration() {
             const category = document.getElementById('category').value;
             const name = document.getElementById('disinfectant').value;
-            
+
             if (category && name && disinfectantDB[category][name]) {
                 const info = disinfectantDB[category][name];
                 document.getElementById('sourceConc').value = info.conc;
-                
+
                 // 自动切换单位
                 const unitSelect = document.getElementById('targetUnit');
                 const unitLabel = document.querySelector('label[for="targetConc"]');
-                
+
                 // 显示/隐藏含氯量信息
                 displayChlorineInfo(category, name, info);
-                
+
                 if (info.unitMode === 'clo2_mgl') {
                     // 二氧化氯专用 mg/L 模式
                     unitSelect.value = 'mg/L';
@@ -273,7 +369,7 @@
                 }
             }
         }
-        
+
         // 显示含氯消毒剂信息
         function displayChlorineInfo(category, name, info) {
             // 查找或创建信息容器
@@ -285,12 +381,12 @@
                 infoContainer.id = 'chlorineInfoContainer';
                 targetRow.parentNode.insertBefore(infoContainer, targetRow.nextSibling);
             }
-            
+
             // 判断是否为固体
             const isSolid = info.type === '固体';
             const typeIcon = isSolid ? '📦' : '🧪';
             const typeLabel = isSolid ? '固体/粉剂' : '液体';
-            
+
             // 只有含氯消毒剂才显示详细信息
             if (category === '含氯消毒剂') {
                 // 计算有效氯含量描述
@@ -309,14 +405,14 @@
                     chlorineLevel = '低浓度';
                     levelColor = '#27ae60';
                 }
-                
+
                 // 计算相当于多少mg/L的有效氯
                 const mgPerLiter = info.conc * 10000;
-                
+
                 // 固体和液体的用量单位不同
                 const unitText = isSolid ? '每100g含有效氯' : '每100mL含有效氯';
                 const amountText = isSolid ? `${(info.conc * 1000).toLocaleString()}mg` : `${(info.conc * 1000).toLocaleString()}mg`;
-                
+
                 infoContainer.innerHTML = `
                     <div style="background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid ${levelColor};"
                     >
@@ -332,7 +428,7 @@
                                 <div style="font-size: 14px; color: #666;"
                                 >
                                     原液浓度: <strong style="color: ${levelColor}; font-size: 16px;"
-                                    >${info.conc}%</strong> 
+                                    >${info.conc}%</strong>
                                     <span style="margin: 0 10px;"
                                     >|</span>
                                     有效氯: <strong>${mgPerLiter.toLocaleString()} mg/L</strong>
@@ -348,13 +444,13 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; font-size: 13px; color: #666;"
                         >
                             💡 <strong>说明：</strong>${unitText}${amountText}，
                             ${isSolid ? '需先溶解于水后再使用，按<strong>重量(g)</strong>计算用量' : '直接使用原液，按<strong>体积(mL)</strong>计算用量'}
                         </div>
-                        
+
                         ${isSolid ? `
                         <div style="margin-top: 8px; padding: 8px; background: #fff3e0; border-radius: 4px; font-size: 12px; color: #e65100;"
                         >
@@ -373,10 +469,10 @@
                 } else if (name.includes('过氧化氢')) {
                     peroxideType = '过氧化氢含量';
                 }
-                
+
                 // 判断是否为固体（二氧化氯泡腾片）
                 const isPeroxideSolid = info.type === '固体';
-                
+
                 infoContainer.innerHTML = `
                     <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #e74c3c;"
                     >
