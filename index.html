@@ -15,7 +15,7 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
-    <title>柳州市疾病预防控制中心病原微生物防控系统（v1.6.0）</title>
+    <title>柳州市疾病预防控制中心病原微生物防控系统（v1.7.0）</title>
     <style>
         * {
             margin: 0;
@@ -886,8 +886,8 @@
                     vomit: { type: "含氯消毒剂", conc: "5000", unit: "mg/L", time: "30分钟" },
                     note: "病毒抵抗力弱，常规消毒即可，空气消毒可用二氧化氯"
                 },
-                "人感染高致病性禽流感": {
-                    pathogen: "高致病性禽流感病毒(H5N1/H7N9等)",
+                "人感染新亚型流感": {
+                    pathogen: "新型流感病毒(如H5N1/H7N9等)",
                     transmission: "呼吸道飞沫、接触感染禽类/环境",
                     level: "最高（按甲类管理）",
                     environment: { type: "含氯消毒剂", conc: "2000", unit: "mg/L", time: "60分钟" },
@@ -907,7 +907,7 @@
                     rodent: { type: "鼠类控制", method: "灭鼠", note: "同时进行鼠密度监测" },
                     excreta: { type: "含氯消毒剂", conc: "5000", unit: "mg/L", time: "60分钟" },
                     vomit: { type: "含氯消毒剂", conc: "10000", unit: "mg/L", time: "60分钟" },
-                    note: "重点防鼠灭鼠，污染场所彻底消毒"
+                    note: "自然疫源性疾病，重点防鼠灭鼠，污染场所彻底消毒，做好病媒防控"
                 },
                 "狂犬病": {
                     pathogen: "狂犬病毒",
@@ -924,14 +924,14 @@
                     transmission: "蚊媒传播",
                     level: "中",
                     mosquito: { type: "蚊媒控制", method: "灭蚊", note: "清除积水，使用杀虫剂" },
-                    note: "重点防蚊灭蚊，病毒抵抗力弱"
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（防蚊灭蚊）"
                 },
                 "登革热": {
                     pathogen: "登革病毒",
                     transmission: "伊蚊叮咬",
                     level: "中",
                     mosquito: { type: "伊蚊控制", method: "清除积水容器", note: "翻盆倒罐，消灭孳生地" },
-                    note: "无特效疫苗，以灭蚊为主"
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（清除伊蚊孳生地、防蚊灭蚊）"
                 },
                 "猴痘": {
                     pathogen: "猴痘病毒",
@@ -1025,30 +1025,55 @@
                     transmission: "接触感染动物、食用未煮熟肉制品",
                     level: "中",
                     animal: { type: "焚烧", method: "深埋或焚烧", note: "病畜无害化处理" },
-                    note: "重点动物检疫，生熟分开"
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（动物检疫、生熟分开、个人防护）"
                 },
-                "淋病、梅毒": {
-                    pathogen: "淋病奈瑟菌、梅毒螺旋体",
+                "淋病": {
+                    pathogen: "淋病奈瑟菌",
+                    transmission: "性接触",
+                    level: "中",
+                    environment: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "30分钟" },
+                    fabric: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "30分钟", method: "浸泡消毒" },
+                    instrument: { type: "高压蒸汽", method: "121℃高压蒸汽", time: "15分钟" },
+                    note: "淋病奈瑟菌抵抗力弱，常规消毒即可，污染织物需消毒处理"
+                },
+                "梅毒": {
+                    pathogen: "梅毒螺旋体",
                     transmission: "性接触、母婴",
                     level: "中",
                     environment: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "30分钟" },
                     fabric: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "30分钟", method: "浸泡消毒" },
                     instrument: { type: "高压蒸汽", method: "121℃高压蒸汽", time: "15分钟" },
-                    note: "螺旋体抵抗力极弱，常规消毒即可，污染织物需消毒处理"
+                    note: "梅毒螺旋体抵抗力极弱，常规消毒即可，污染织物需消毒处理"
                 },
                 "钩端螺旋体病": {
                     pathogen: "钩端螺旋体",
                     transmission: "接触疫水、皮肤黏膜",
                     level: "中",
                     water: { type: "含氯消毒剂", conc: "5", unit: "mg/L", time: "30分钟" },
-                    note: "重点控制鼠类和猪"
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（控制鼠类和猪、避免疫水接触）"
                 },
                 "疟疾": {
                     pathogen: "疟原虫",
                     transmission: "按蚊叮咬",
                     level: "中",
                     mosquito: { type: "灭蚊", method: "灭蚊", note: "防蚊灭蚊为主" },
-                    note: "无直接人传人，无需特殊消毒"
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（防蚊灭蚊）"
+                },
+                "新生儿破伤风": {
+                    pathogen: "破伤风梭菌",
+                    transmission: "产道感染、脐带残端感染",
+                    level: "高",
+                    environment: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "60分钟" },
+                    instrument: { type: "高压蒸汽", method: "121℃高压蒸汽", time: "30分钟" },
+                    fabric: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "60分钟", method: "浸泡消毒" },
+                    note: "严格器械灭菌，重视脐带断端消毒，新生儿接生严格无菌操作"
+                },
+                "血吸虫病": {
+                    pathogen: "日本血吸虫",
+                    transmission: "接触疫水（尾蚴经皮肤侵入）",
+                    level: "中",
+                    water: { type: "灭蚴", method: "消灭钉螺和尾蚴", note: "避免接触疫水" },
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（查灭钉螺、避免疫水接触）"
                 }
             },
             "丙类": {
@@ -1098,7 +1123,7 @@
                     hand: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "1分钟" },
                     note: "儿童玩具、餐具重点消毒，注意手卫生，患者排泄物和呕吐物需严格消毒"
                 },
-                "感染性腹泻病": {
+                "其他感染性腹泻": {
                     pathogen: "诺如病毒、轮状病毒等",
                     transmission: "粪-口途径",
                     level: "中",
@@ -1119,6 +1144,36 @@
                     excreta: { type: "含氯消毒剂", conc: "2000", unit: "mg/L", time: "60分钟" },
                     vomit: { type: "含氯消毒剂", conc: "5000", unit: "mg/L", time: "60分钟" },
                     note: "注意手卫生，个人用品专用，患者排泄物和呕吐物需消毒处理"
+                },
+                "麻风病": {
+                    pathogen: "麻风分枝杆菌",
+                    transmission: "长期密切接触、呼吸道飞沫",
+                    level: "低",
+                    environment: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "30分钟" },
+                    fabric: { type: "含氯消毒剂", conc: "500", unit: "mg/L", time: "30分钟", method: "浸泡消毒" },
+                    note: "麻风分枝杆菌抵抗力弱，常规消毒即可"
+                },
+                "黑热病": {
+                    pathogen: "杜氏利什曼原虫",
+                    transmission: "白蛉叮咬",
+                    level: "中",
+                    mosquito: { type: "白蛉控制", method: "防蛉灭蛉", note: "使用杀虫剂、个人防护" },
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（防蛉灭蛉）"
+                },
+                "包虫病": {
+                    pathogen: "棘球绦虫幼虫",
+                    transmission: "接触感染犬只、食用被虫卵污染的食物",
+                    level: "中",
+                    environment: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "60分钟" },
+                    animal: { type: "犬只管理", method: "家犬定期驱虫", note: "病畜脏器深埋或焚烧" },
+                    note: "自然疫源性疾病，重点做好犬只管理，污染场所消毒处理"
+                },
+                "丝虫病": {
+                    pathogen: "丝虫（班氏丝虫、马来丝虫等）",
+                    transmission: "蚊媒叮咬",
+                    level: "低",
+                    mosquito: { type: "蚊媒控制", method: "灭蚊", note: "防蚊灭蚊为主" },
+                    note: "自然疫源性疾病，无需消毒，做好病媒防控（防蚊灭蚊）"
                 }
             }
         };
