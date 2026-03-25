@@ -4,6 +4,12 @@
 
 ---
 
+## Obsidian 知识库位置
+
+**CDC库路径：** `/Users/liaoweizhou/Desktop/Obsidian-CDC库`
+
+---
+
 ## Credentials Location
 
 All credentials stored in `.credentials/` (gitignored):
@@ -82,6 +88,26 @@ gh run download RUN_ID --repo liaoweizhou790-crypto/disinfectant-calc --name "CD
 ## Why Separate?
 
 Skills define *how* tools work. This file is for *your* specifics — the stuff that's unique to your setup.
+
+---
+
+## 布雷图指数（Breteau Index, BI）风险等级标准
+
+> ⚠️ 重要：以下为标准定义，必须严格遵守
+
+| 布雷图指数范围 | 风险等级描述 | 防控措施建议 |
+|:---:|:---|:---|
+| **BI < 5** | 控制登革热传播的阈值 | 维持在当前水平，继续常规监测 |
+| **5 ≤ BI < 10** | 有传播风险 | 加强监测频次，开展爱国卫生运动 |
+| **10 ≤ BI < 20** | 有聚集性疫情风险 | 紧急消杀，清除积水，健康宣教 |
+| **BI ≥ 20** | 有局部暴发风险 | 立即启动应急响应，全面灭蚊，病例搜索 |
+
+**计算公式：**
+```
+布雷图指数(BI) = (阳性容器数 / 监测户数) × 100
+```
+
+**参考标准来源：** WHO登革热防控指南 / 中国疾病预防控制中心登革热监测方案
 
 ---
 
