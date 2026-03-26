@@ -23,11 +23,11 @@ jobs:
       with:
         node-version: '22'
     
-    - name: Sync www/index.html to root
+    - name: Sync root index.html to www
       working-directory: ./pathogen-control-system
       run: |
-        cp www/index.html index.html
-        echo "✅ 已同步 www/index.html → index.html"
+        cp index.html www/index.html
+        echo "✅ 已同步 index.html → www/index.html"
     
     - name: Install dependencies
       working-directory: ./pathogen-control-system
@@ -57,7 +57,7 @@ jobs:
     - name: Upload APK to Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: CDC-Pathogen-Control-V${{ steps.version.outputs.version }}
+        name: 病原微生物防控系统_V${{ steps.version.outputs.version }}
         path: pathogen-control-system/apk-versions/${{ steps.version.outputs.version }}/*.apk
         retention-days: 90
     
