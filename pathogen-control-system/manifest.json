@@ -2,7 +2,7 @@
   "name": "柳州市疾病预防控制中心病原微生物防控系统",
   "short_name": "病原微生物防控",
   "description": "柳州市疾病预防控制中心病原微生物防控系统 - 包含消毒剂配比计算和传染病消毒方案",
-  "version": "1.5.0",
+  "version": "1.8.3",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#667eea",

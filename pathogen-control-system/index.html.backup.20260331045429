@@ -15,7 +15,7 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
-    <title>柳州市疾病预防控制中心病原微生物防控系统（v1.8.3）</title>
+    <title>柳州市疾病预防控制中心病原微生物防控系统（v1.8.1）</title>
     <style>
         * {
             margin: 0;
@@ -267,7 +267,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🧬 柳州市疾病预防控制中心病原微生物防控系统（v1.8.3）</h1>
+        <h1>🧬 柳州市疾病预防控制中心病原微生物防控系统（v1.8.1）</h1>
         
         <div class="tabs">
             <button class="tab active" onclick="switchTab('calc')">配比计算</button>
@@ -2737,9 +2737,9 @@ const pathogenDB = {
     "耳念珠菌": { type: "真菌", category: "第三类", bsl: "BSL-2", family: "念珠菌属", disease: "侵袭性念珠菌病", transmission: "接触", disinfection: { type: "含氯消毒剂", conc: "1000", unit: "mg/L", time: "30分钟", note: "多重耐药" } },
     
     // 朊病毒
-    "朊病毒": { type: "朊病毒", category: "第二类", bsl: "BSL-2/3", family: "朊蛋白", disease: "克雅病/疯牛病", transmission: "医源性/食入", disinfection: { type: "多方法组合", conc: "参见备注", unit: "", time: "≥1小时", note: "【焚烧】一次性器械/材料/废物首选;【耐热器械】1mol/L NaOH或20000mg/L次氯酸钠浸泡1h→冲洗→下排气121℃1h或预真空134℃18min;【物体表面/热敏器械】2mol/L NaOH或20000mg/L次氯酸钠作用1h→冲洗;【干燥物品】2mol/L NaOH或20000mg/L次氯酸钠浸泡1h→冲洗→预真空≥121℃1h;参照GB19193-2025附录B" } },
-    "疯牛病朊蛋白": { type: "朊病毒", category: "第二类", bsl: "BSL-3", family: "朊蛋白", disease: "牛海绵状脑病", transmission: "食入", disinfection: { type: "多方法组合", conc: "参见备注", unit: "", time: "≥1小时", note: "【焚烧】一次性器械/材料/废物首选;【耐热器械】1mol/L NaOH或20000mg/L次氯酸钠浸泡1h→冲洗→下排气121℃1h或预真空134℃18min;【物体表面/热敏器械】2mol/L NaOH或20000mg/L次氯酸钠作用1h→冲洗;【干燥物品】2mol/L NaOH或20000mg/L次氯酸钠浸泡1h→冲洗→预真空≥121℃1h;【大型不耐受物品】预真空134℃1h。参照GB19193-2025附录B" } },
-    "变异型克雅病": { type: "朊病毒", category: "第二类", bsl: "BSL-3", family: "朊蛋白", disease: "vCJD", transmission: "食入", disinfection: { type: "多方法组合", conc: "参见备注", unit: "", time: "≥1小时", note: "【焚烧】一次性器械/材料/废物首选;【耐热器械】1mol/L NaOH或20000mg/L次氯酸钠浸泡1h→冲洗→下排气121℃1h或预真空134℃18min;【物体表面/热敏器械】2mol/L NaOH或20000mg/L次氯酸钠作用1h→冲洗;参照GB19193-2025附录B" } }
+    "朊病毒": { type: "朊病毒", category: "第二类", bsl: "BSL-2/3", family: "朊蛋白", disease: "克雅病/疯牛病", transmission: "医源性/食入", disinfection: { type: "特殊处理", conc: "1N", unit: "NaOH", time: "1小时", note: "134℃高压灭菌+NaOH处理" } },
+    "疯牛病朊蛋白": { type: "朊病毒", category: "第二类", bsl: "BSL-3", family: "朊蛋白", disease: "牛海绵状脑病", transmission: "食入", disinfection: { type: "特殊处理", conc: "1N", unit: "NaOH", time: "1小时", note: "需要134℃高压灭菌" } },
+    "变异型克雅病": { type: "朊病毒", category: "第二类", bsl: "BSL-3", family: "朊蛋白", disease: "vCJD", transmission: "食入", disinfection: { type: "特殊处理", conc: "1N", unit: "NaOH", time: "1小时", note: "疯牛病相关" } }
 };
 
 // 当前选中的病原

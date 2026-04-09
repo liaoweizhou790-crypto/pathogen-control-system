@@ -1,7 +1,7 @@
 {
   "name": "pathogen-control-system",
-  "version": "1.8.1",
-  "description": "柳州市疾病预防控制中心病原微生物防控系统 v1.8.1 - 更新猴痘/肺结核/狂犬病消毒方案",
+  "version": "1.8.3",
+  "description": "柳州市疾病预防控制中心病原微生物防控系统 v1.8.3 - 更新朊病毒消毒方案（参照GB19193-2025附录B）",
   "main": "index.html",
   "scripts": {
     "build": "echo 'Build complete'",
